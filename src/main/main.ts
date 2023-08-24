@@ -14,7 +14,6 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 // import crypto from 'crypto';
 import sqlite3 from 'sqlite3';
-import fs from 'fs';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -26,7 +25,7 @@ class AppUpdater {
   }
 }
 
-let mainWindow: BrowserWindow | null = null;
+let mainWindow: BrowserWindow;
 
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
@@ -192,10 +191,7 @@ ipcMain.handle('register-user-info', async (event, args) => {
             );
           });
           if (OK) {
-            const w = BrowserWindow.getFocusedWindow();
-            w.webContents.send('result-register', {
-              status: 'OK',
-            });
+            mainWindow.webContents.send('result-register', { status: 'OK' });
           }
         }
       }

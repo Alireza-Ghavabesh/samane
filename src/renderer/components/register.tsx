@@ -35,7 +35,7 @@ export default function Register() {
     setAddress(event.target.value);
   };
 
-  //======================================
+  //= =====================================
 
   function selectImages(e) {
     setIsImagechoosed(true);
@@ -45,16 +45,14 @@ export default function Register() {
     });
   }
 
-  window.electron.ipcRenderer.resultRegister((event, value) => {
-    // if (value.status === 'OK') {
-    //   alert('اطلاعات با موفقیت ثبت شد.');
-    // }
-    // console.log(event);
-    console.log(value);
-  });
-
   function registerUserInfo(e) {
     e.preventDefault();
+
+    window.electron.ipcRenderer.resultRegister((event, value) => {
+      if (value.status === 'OK') {
+        alert('اطلاعات با موفقیت ثبت شد.');
+      }
+    });
 
     if (IsImagechoosed) {
       window.electron.ipcRenderer.registerUserInfo({
@@ -81,7 +79,10 @@ export default function Register() {
 
   return (
     <div className="flex p-4 gap-4 justify-between min-w-fit resize-none">
-      <Link to="/" className="bg-yellow-400 text-2xl p-2 rounded-xl h-fit">
+      <Link
+        to="/"
+        className="bg-yellow-400 text-2xl p-2 rounded-xl h-fit min-w-fit"
+      >
         بازگشت
       </Link>
 
@@ -137,7 +138,11 @@ export default function Register() {
           placeholder="آدرس"
           onChange={handleChangeAddress}
         />
-        <button id="upload-tasvir" onClick={selectImages} className="bg-white">
+        <button
+          id="upload-tasvir"
+          onClick={selectImages}
+          className="bg-white border-4 outline-none placeholder:p-2 h-12 rounded-xl"
+        >
           انتخاب تصویر
         </button>
         <button

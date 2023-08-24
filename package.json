@@ -118,8 +118,6 @@
     "sqlite-electron": "^2.2.8",
     "sqlite3": "^5.1.6",
     "styled-components": "^5.3.11",
-    "tw-elements": "^1.0.0-beta3",
-    "tw-elements-react": "^1.0.0-alpha1",
     "uninstall": "^0.0.0"
   },
   "devDependencies": {
