@@ -3,8 +3,10 @@ import { MemoryRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
 import './App.css';
 import './dist/output.css';
+import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import Register from './components/register';
 import Search from './components/search';
+import IRANSansWeb from './../../assets/fonts/IRANSansWeb.woff2';
 
 function Main() {
   return (
@@ -15,14 +17,33 @@ function Main() {
   );
 }
 
+const theme = createTheme({
+  typography: {
+    fontFamily: 'IRANSansWeb',
+  },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: `
+        @font-face {
+          font-family: 'IRANSansWeb';
+          src: local('IRANSansWeb'), local('IRANSansWeb'), url(${IRANSansWeb}) format('woff2');
+        }
+      `,
+    },
+  },
+});
+
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Main />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/search" element={<Search />} />
-      </Routes>
-    </Router>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Main />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/search" element={<Search />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }

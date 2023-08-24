@@ -13,7 +13,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
+/* @font-face {
   font-family: "IRANSansWeb";
   src: local("IRANSansWeb"),
    url("https://dl.dastyar.io/fonts/IranSans/IRANSansWeb-Bold.woff2") format("truetype");
@@ -22,4 +22,4 @@
 
 *{
   font-family: "IRANSansWeb";
-}
+} */

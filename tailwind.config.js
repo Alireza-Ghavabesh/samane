@@ -1,14 +1,9 @@
+/* eslint-disable global-require */
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './index.html',
-    './src/**/*.{js,ts,jsx,tsx,ejs}',
-    './node_modules/tw-elements-react/dist/js/**/*.js',
-  ],
+  content: ['./src/**/*.{js,ts,jsx,tsx,ejs}'],
   theme: {
     extend: {},
   },
-  darkMode: 'class',
-  // eslint-disable-next-line global-require
-  plugins: [require('tw-elements-react/dist/plugin.cjs')],
+  plugins: [],
 };

@@ -9,9 +9,12 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+// import crypto from 'crypto';
+import sqlite3 from 'sqlite3';
+import fs from 'fs';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -30,6 +33,8 @@ ipcMain.on('ipc-example', async (event, arg) => {
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
 });
+
+// eslint-disable-next-line consistent-return
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -71,8 +76,8 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    width: 866,
+    height: 550,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: app.isPackaged
@@ -81,6 +86,7 @@ const createWindow = async () => {
     },
   });
 
+  // mainWindow.setResizable(false);
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
@@ -98,6 +104,8 @@ const createWindow = async () => {
     mainWindow = null;
   });
 
+  // eslint-disable-next-line consistent-return, @typescript-eslint/no-unused-vars
+
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
@@ -111,6 +119,86 @@ const createWindow = async () => {
   // eslint-disable-next-line
   new AppUpdater();
 };
+
+// const uuid = crypto.randomUUID();
+const db = new sqlite3.Database(`basij.db`);
+
+const p = path.join(__dirname, '../../');
+fs.readdir(p, (err, files) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let flag = false;
+  files.forEach((file) => {
+    if (file.includes('basij')) {
+      flag = true;
+    }
+  });
+  if (!flag) {
+    // const uuid = crypto.randomUUID();
+    db.run(`CREATE TABLE users (
+          id INTEGER PRIMARY KEY,
+          full_name TEXT NOT NULL,
+          national_code TEXT NOT NULL,
+          birth_date TEXT NOT NULL,
+          address TEXT NOT NULL
+        )`);
+    db.run(`CREATE TABLE images (
+          id INTEGER,
+          user_id TEXT NOT NULL,
+          full_path TEXT NOT NULL,
+          PRIMARY KEY (id),
+          FOREIGN KEY (user_id)
+              REFERENCES users (id)
+                ON DELETE CASCADE
+                ON UPDATE NO ACTION
+        )`);
+  }
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+let uploadedFiles: string[];
+// eslint-disable-next-line consistent-return
+ipcMain.handle('register-user-info', async (event, args) => {
+  if (args.op_type === 'images') {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ['multiSelections'],
+    });
+    // console.log(filePaths);
+    uploadedFiles = filePaths;
+    if (!canceled) {
+      return filePaths[0];
+    }
+  } else {
+    db.run(
+      `
+      INSERT INTO users (full_name, national_code, birth_date, address)
+      VALUES (?, ?, ?, ?)
+      `,
+      [
+        args.info.fullName,
+        args.info.nationalCode,
+        `${args.info.year}-${args.info.month}-${args.info.day}`,
+        args.info.address,
+      ],
+      function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          // eslint-disable-next-line camelcase
+          uploadedFiles.forEach((file_path) => {
+            db.run(
+              `
+            INSERT INTO images (user_id, full_path)
+            VALUES (?, ?)
+            `,
+              // eslint-disable-next-line camelcase
+              [this.lastID, file_path]
+            );
+          });
+        }
+      }
+    );
+  }
+});
 
 /**
  * Add event listeners...
