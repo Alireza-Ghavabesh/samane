@@ -9,6 +9,7 @@ export default function Register() {
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [address, setAddress] = useState('');
+  const [IsImagechoosed, setIsImagechoosed] = useState(false);
 
   const handleChangeFullName = (event) => {
     setFullName(event.target.value);
@@ -37,31 +38,45 @@ export default function Register() {
   //======================================
 
   function selectImages(e) {
+    setIsImagechoosed(true);
     e.preventDefault();
     window.electron.ipcRenderer.registerUserInfo({
       op_type: 'images',
     });
   }
 
+  window.electron.ipcRenderer.resultRegister((event, value) => {
+    // if (value.status === 'OK') {
+    //   alert('اطلاعات با موفقیت ثبت شد.');
+    // }
+    // console.log(event);
+    console.log(value);
+  });
+
   function registerUserInfo(e) {
     e.preventDefault();
-    window.electron.ipcRenderer.registerUserInfo({
-      op_type: 'info',
-      info: {
-        fullName,
-        nationalCode,
-        year,
-        month,
-        day,
-        address,
-      },
-    });
-    console.log(fullName);
-    console.log(nationalCode);
-    console.log(year);
-    console.log(month);
-    console.log(day);
-    console.log(address);
+
+    if (IsImagechoosed) {
+      window.electron.ipcRenderer.registerUserInfo({
+        op_type: 'info',
+        info: {
+          fullName,
+          nationalCode,
+          year,
+          month,
+          day,
+          address,
+        },
+      });
+      console.log(fullName);
+      console.log(nationalCode);
+      console.log(year);
+      console.log(month);
+      console.log(day);
+      console.log(address);
+    } else {
+      alert('تصویر انتخاب نکرده اید!');
+    }
   }
 
   return (

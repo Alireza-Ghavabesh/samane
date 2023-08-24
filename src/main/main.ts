@@ -123,36 +123,24 @@ const createWindow = async () => {
 // const uuid = crypto.randomUUID();
 const db = new sqlite3.Database(`basij.db`);
 
-const p = path.join(__dirname, '../../');
-fs.readdir(p, (err, files) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let flag = false;
-  files.forEach((file) => {
-    if (file.includes('basij')) {
-      flag = true;
-    }
-  });
-  if (!flag) {
-    // const uuid = crypto.randomUUID();
-    db.run(`CREATE TABLE users (
-          id INTEGER PRIMARY KEY,
-          full_name TEXT NOT NULL,
-          national_code TEXT NOT NULL,
-          birth_date TEXT NOT NULL,
-          address TEXT NOT NULL
-        )`);
-    db.run(`CREATE TABLE images (
-          id INTEGER,
-          user_id TEXT NOT NULL,
-          full_path TEXT NOT NULL,
-          PRIMARY KEY (id),
-          FOREIGN KEY (user_id)
-              REFERENCES users (id)
-                ON DELETE CASCADE
-                ON UPDATE NO ACTION
-        )`);
-  }
-});
+// const uuid = crypto.randomUUID();
+db.run(`CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  national_code TEXT NOT NULL,
+  birth_date TEXT NOT NULL,
+  address TEXT NOT NULL
+)`);
+db.run(`CREATE TABLE IF NOT EXISTS images (
+  id INTEGER,
+  user_id TEXT NOT NULL,
+  full_path TEXT NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (user_id)
+      REFERENCES users (id)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION
+)`);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let uploadedFiles: string[];
@@ -180,9 +168,13 @@ ipcMain.handle('register-user-info', async (event, args) => {
         args.info.address,
       ],
       function (err) {
+        let OK = true;
         if (err) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          OK = false;
           console.log(err);
         } else {
+          // eslint-disable-next-line camelcase
           // eslint-disable-next-line camelcase
           uploadedFiles.forEach((file_path) => {
             db.run(
@@ -191,9 +183,20 @@ ipcMain.handle('register-user-info', async (event, args) => {
             VALUES (?, ?)
             `,
               // eslint-disable-next-line camelcase
-              [this.lastID, file_path]
+              [this.lastID, file_path],
+              function (err) {
+                if (err) {
+                  OK = false;
+                }
+              }
             );
           });
+          if (OK) {
+            const w = BrowserWindow.getFocusedWindow();
+            w.webContents.send('result-register', {
+              status: 'OK',
+            });
+          }
         }
       }
     );

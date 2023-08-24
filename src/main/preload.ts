@@ -23,6 +23,7 @@ const electronHandler = {
     },
     registerUserInfo: (args: any) =>
       ipcRenderer.invoke('register-user-info', args),
+    resultRegister: (callback) => ipcRenderer.on('result-register', callback),
   },
 };
 
