@@ -23,8 +23,11 @@ const electronHandler = {
     },
     registerUserInfo: (args: any) =>
       ipcRenderer.invoke('register-user-info', args),
-    resultRegister: (callback) => ipcRenderer.on('result-register', callback),
-    getUsers: (callback) => ipcRenderer.on('get-users', callback),
+    onResultRegister: (callback) => ipcRenderer.on('result-register', callback),
+    invokeGetUsers: (args: any) => ipcRenderer.invoke('invoke-get-users', args),
+    onGetUsers: (callback) => ipcRenderer.once('get-users', callback),
+    removeAllListenersGetUsers: () =>
+      ipcRenderer.removeAllListeners('get-users'),
   },
 };
 

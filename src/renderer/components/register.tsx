@@ -48,7 +48,7 @@ export default function Register() {
   function registerUserInfo(e) {
     e.preventDefault();
 
-    window.electron.ipcRenderer.resultRegister((event, value) => {
+    window.electron.ipcRenderer.onResultRegister((event, value) => {
       if (value.status === 'OK') {
         alert('اطلاعات با موفقیت ثبت شد.');
       }

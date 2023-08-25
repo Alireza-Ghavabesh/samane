@@ -199,6 +199,43 @@ ipcMain.handle('register-user-info', async (event, args) => {
   }
 });
 
+ipcMain.handle('invoke-get-users', async (event, args) => {
+  console.log(args.term);
+  if (args.term === '') {
+    db.all(`select * from users`, [], (err, rows) => {
+      if (err) {
+        console.log(err);
+      } else {
+        // console.log(rows);
+        // rows.forEach((row) => {
+        //   console.log(row.name);
+        // });
+        mainWindow.webContents.send('get-users', { users: rows });
+      }
+    });
+  } else {
+    db.all(
+      `select * from users where full_name like '%${args.term}%'
+      or national_code like '%${args.term}%'
+      or birth_date like '%${args.term}%'
+      or address like '%${args.term}%'
+      `,
+      [],
+      (err, rows) => {
+        if (err) {
+          console.log(err);
+        } else {
+          // console.log(rows);
+          // rows.forEach((row) => {
+          //   console.log(row.name);
+          // });
+          mainWindow.webContents.send('get-users', { users: rows });
+        }
+      }
+    );
+  }
+});
+
 /**
  * Add event listeners...
  */
