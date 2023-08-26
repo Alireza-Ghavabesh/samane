@@ -36,7 +36,7 @@ export default function Search() {
       <div className="flex flex-row p-4 gap-4 justify-between">
         <Link
           to="/"
-          className="bg-yellow-400 text-2xl p-2 rounded-xl h-fit min-w-fit"
+          className="bg-yellow-400 text-2xl p-2 rounded-xl h-fit min-w-fit border-black border-4"
         >
           بازگشت
         </Link>
@@ -46,6 +46,8 @@ export default function Search() {
           dir="rtl"
           placeholder="جستجو"
           onChange={handleChangeSearch}
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus
         />
       </div>
       <div dir="rtl" className="p-4">
@@ -56,6 +58,7 @@ export default function Search() {
               <th className="border p-2">کد ملی</th>
               <th className="border p-2">تاریخ تولد</th>
               <th className="border p-2">آدرس</th>
+              <th className="border p-2">شماره همراه</th>
               <th className="border p-2">عکس</th>
             </tr>
           </thead>
@@ -67,6 +70,7 @@ export default function Search() {
                   <td className="border p-2">{user.national_code}</td>
                   <td className="border p-2">{user.birth_date}</td>
                   <td className="border p-2">{user.address}</td>
+                  <td className="border p-2">{user.mobile}</td>
                   <td className="border p-2">
                     <img
                       src="https://www.dehkadehquran.ir/wp-content/uploads/elementor/thumbs/-دوره-تجوید-سطح-یک-2-q7mjcu57kej5rjxenma7f838pldfoba387fb85knre.jpg"

@@ -125,10 +125,11 @@ const db = new sqlite3.Database(`basij.db`);
 // const uuid = crypto.randomUUID();
 db.run(`CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY,
-  full_name TEXT NOT NULL,
-  national_code TEXT NOT NULL,
-  birth_date TEXT NOT NULL,
-  address TEXT NOT NULL
+  full_name TEXT,
+  national_code TEXT,
+  birth_date TEXT,
+  address TEXT,
+  mobile TEXT
 )`);
 db.run(`CREATE TABLE IF NOT EXISTS images (
   id INTEGER,
@@ -157,14 +158,15 @@ ipcMain.handle('register-user-info', async (event, args) => {
   } else {
     db.run(
       `
-      INSERT INTO users (full_name, national_code, birth_date, address)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO users (full_name, national_code, birth_date, address, mobile)
+      VALUES (?, ?, ?, ?, ?)
       `,
       [
         args.info.fullName,
         args.info.nationalCode,
         `${args.info.year}-${args.info.month}-${args.info.day}`,
         args.info.address,
+        args.info.mobile,
       ],
       function (err) {
         let OK = true;

@@ -9,30 +9,35 @@ export default function Register() {
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [address, setAddress] = useState('');
+  const [mobile, setMobile] = useState('');
   const [IsImagechoosed, setIsImagechoosed] = useState(false);
 
   const handleChangeFullName = (event) => {
-    setFullName(event.target.value);
+    setFullName(() => event.target.value);
   };
 
   const handleChangeNationalCode = (event) => {
-    setNationalCode(event.target.value);
+    setNationalCode(() => event.target.value);
   };
 
   const handleChangeYear = (event) => {
-    setYear(event.target.value);
+    setYear(() => event.target.value);
   };
 
   const handleChangeMonth = (event) => {
-    setMonth(event.target.value);
+    setMonth(() => event.target.value);
   };
 
   const handleChangeDay = (event) => {
-    setDay(event.target.value);
+    setDay(() => event.target.value);
   };
 
   const handleChangeAddress = (event) => {
-    setAddress(event.target.value);
+    setAddress(() => event.target.value);
+  };
+
+  const handleChangeMobile = (event) => {
+    setMobile(() => event.target.value);
   };
 
   //= =====================================
@@ -64,6 +69,7 @@ export default function Register() {
           month,
           day,
           address,
+          mobile,
         },
       });
       console.log(fullName);
@@ -72,6 +78,7 @@ export default function Register() {
       console.log(month);
       console.log(day);
       console.log(address);
+      console.log(mobile);
     } else {
       alert('تصویر انتخاب نکرده اید!');
     }
@@ -104,6 +111,13 @@ export default function Register() {
           dir="rtl"
           placeholder="کد ملی"
           onChange={handleChangeNationalCode}
+        />
+        <input
+          type="text"
+          className="border-4 outline-none placeholder:p-2 rounded-xl h-12"
+          dir="rtl"
+          placeholder="شماره همراه"
+          onChange={handleChangeMobile}
         />
         <div className="flex gap-2 justify-between">
           <input

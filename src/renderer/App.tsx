@@ -10,9 +10,38 @@ import IRANSansWeb from './../../assets/fonts/IRANSansWeb.woff2';
 
 function Main() {
   return (
-    <div className="flex flex-row justify-around bg-blue-400 py-4 text-4xl items-center">
-      <Link to="/search">جستجو</Link>
-      <Link to="/register">ثبت</Link>
+    <div className="flex flex-col p-4 h-screen justify-between bg-yellow-300">
+      <div className="flex justify-center rounded-2xl">
+        <img
+          src="https://farsgraphic.com/wp-content/uploads/2021/10/دانلود-رایگان-وکتور-لوگو-آرم-سپاه-پاسداران.png"
+          alt=""
+          className="max-h-fit"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex justify-center font-bold text-4xl bg-green-900 text-yellow-500 p-8 rounded-xl">
+          پایگاه مقاومت بسیج شهید مهدی نریمی
+        </div>
+        <div className=" flex gap-2">
+          <div className="w-1/2 bg-amber-700 rounded-2xl">
+            <Link
+              to="/search"
+              className="w-full text-white flex justify-center p-4 items-center hover:bg-slate-200 font-bold text-2xl"
+            >
+              جستجو در اطلاعات ثبت شده
+            </Link>
+          </div>
+          <div className="w-1/2  bg-blue-500 rounded-2xl">
+            <Link
+              to="/register"
+              className="w-full text-white flex justify-center p-4 items-center hover:bg-slate-200 font-bold text-2xl"
+            >
+              ثبت اطلاعات جدید
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
