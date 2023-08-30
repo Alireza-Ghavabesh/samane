@@ -14,12 +14,17 @@ function Main() {
     <div className="h-screen bg-yellow-300">
       <div className="h-fit bg-yellow-300">
         <div className="flex flex-col p-4  justify-between h-screen">
-          <div className='flex justify-center items-center h-full'>
+          <div className='flex justify-center items-center h-full box-border p-10'>
+            <img className='object-contain w-1/3 rounded-full shadow-2xl' src="https://navideshahed.com/files/fa/news/1398/8/26/452178_963.jpg" alt="" />
           <img
               src={sepahImage}
               alt=""
               className="object-contain w-1/3"
             />
+            <img
+            src="https://cdn.eghtesadnews.com/thumbnail/IiPKnTRCDCMl/mW4TY_vzMeEG1fqb61-mcCKrGYGcOSm4SW9Yyhl5b2N1qvFeEPKLcFkzrdrrAcG9cg9gAf9kJWJmze2Es8GZhDlkJqwVKQrtPzxEA1UNWUA,/fi7LR8LxLPGN.jpg"
+             alt="" className="object-contain w-1/3 rounded-full shadow-2xl" />
+
           </div>
           <div className="flex flex-col gap-2  rounded-2xl">
             <div className="flex justify-center font-bold text-4xl bg-green-900 text-yellow-500 p-8 rounded-xl">

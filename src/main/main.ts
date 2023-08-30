@@ -177,6 +177,9 @@ ipcMain.handle('register-user-info', async (event, args) => {
           OK = false;
           console.log(err);
         } else {
+          if(uploadedFiles === undefined){
+            uploadedFiles = [];
+          }
           // eslint-disable-next-line camelcase
           // eslint-disable-next-line camelcase
           uploadedFiles.forEach((file_path) => {

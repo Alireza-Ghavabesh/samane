@@ -55,11 +55,12 @@ export default function Register() {
 
     window.electron.ipcRenderer.onResultRegister((event, value) => {
       if (value.status === 'OK') {
-        alert('اطلاعات با موفقیت ثبت شد');
+        // alert('اطلاعات با موفقیت ثبت شد');
+        console.log('اطلاعات با موفقیت ثبت شد');
       }
     });
 
-    if (IsImagechoosed) {
+    // if (IsImagechoosed) {
       window.electron.ipcRenderer.registerUserInfo({
         op_type: 'info',
         info: {
@@ -79,9 +80,9 @@ export default function Register() {
       console.log(day);
       console.log(address);
       console.log(mobile);
-    } else {
-      alert('تصویر انتخاب نکرده اید!');
-    }
+    // } else {
+    //   alert('تصویر انتخاب نکرده اید!');
+    // }
   }
 
   return (

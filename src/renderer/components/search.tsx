@@ -33,12 +33,14 @@ export default function Search() {
         </Link>
         <input
           type="text"
-          className="border-2  outline-none placeholder:p-2 rounded-xl h-12 w-full"
+          className="border-2 outline-none placeholder:p-2 rounded-xl h-12 w-full"
           dir="rtl"
           placeholder="جستجو"
           onChange={handleChangeSearch}
           // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+
         />
       </div>
       <div dir="rtl" className="p-4">
@@ -62,13 +64,18 @@ export default function Search() {
                   <td className="border p-2">{user.birth_date}</td>
                   <td className="border p-2">{user.address}</td>
                   <td className="border p-2">{user.mobile}</td>
-                  <td className="border p-2">
+                  <td className="flex border p-2 justify-center flex-col">
                     <img
                       src="https://www.dehkadehquran.ir/wp-content/uploads/elementor/thumbs/-دوره-تجوید-سطح-یک-2-q7mjcu57kej5rjxenma7f838pldfoba387fb85knre.jpg"
                       alt=""
                       width={272}
                       height={161}
+                      className='w-full'
                     />
+                    <div className='flex flex-row justify-around'>
+                      <span className='text-4xl bg-green-700 w-1/2'>&#8594;</span>
+                      <span className='text-4xl bg-green-300 w-1/2'>&#8592;</span>
+                    </div>
                   </td>
                 </tr>
               ))}
