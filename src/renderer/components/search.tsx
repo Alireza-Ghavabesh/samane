@@ -4,15 +4,6 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
 export default function Search() {
-  const usrs = [
-    {
-      id: '1',
-      full_name: 'alireza',
-      birth_date: '1378-1-10',
-      address: 'address',
-      national_code: 'nationalcode',
-    },
-  ];
 
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');

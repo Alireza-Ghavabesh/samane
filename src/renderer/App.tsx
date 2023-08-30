@@ -14,17 +14,13 @@ function Main() {
     <div className="h-screen bg-yellow-300">
       <div className="h-fit bg-yellow-300">
         <div className="flex flex-col p-4  justify-between h-screen">
-          <div
-            style={{ height: 650 }}
-            className="flex justify-center rounded-2xl w-auto"
-          >
-            <img
+          <div className='flex justify-center items-center h-full'>
+          <img
               src={sepahImage}
               alt=""
-              className="h-full max-w-full object-contain"
+              className="object-contain w-1/3"
             />
           </div>
-
           <div className="flex flex-col gap-2  rounded-2xl">
             <div className="flex justify-center font-bold text-4xl bg-green-900 text-yellow-500 p-8 rounded-xl">
               پایگاه مقاومت بسیج شهید مهدی نریمی
