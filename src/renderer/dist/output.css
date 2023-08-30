@@ -650,10 +650,6 @@ html.dark {
   border-radius: 1rem;
 }
 
-.rounded-full {
-  border-radius: 9999px;
-}
-
 .rounded-xl {
   border-radius: 0.75rem;
 }
@@ -725,6 +721,11 @@ html.dark {
   background-color: rgb(254 240 138 / var(--tw-bg-opacity));
 }
 
+.bg-yellow-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(253 224 71 / var(--tw-bg-opacity));
+}
+
 .bg-yellow-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(250 204 21 / var(--tw-bg-opacity));
@@ -740,6 +741,14 @@ html.dark {
 
 .p-8 {
   padding: 2rem;
+}
+
+.p-10 {
+  padding: 2.5rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
 }
 
 .px-2 {
@@ -795,16 +804,24 @@ html.dark {
   font-family: "IRANSansWeb";
 } */
 
-.img-1{
+#img-1{
+  object-fit: contain;
   height: 55vh;
+  width: 33%;
+  border-radius: 50%;
 }
 
-.img-2{
+#img-2{
+  object-fit: contain;
   height: 55vh;
+  width: 33%;
 }
 
-.img-3{
+#img-3{
+  object-fit: contain;
   height: 55vh;
+  width: 33%;
+  border-radius: 50%;
 }
 
 /* img-div{

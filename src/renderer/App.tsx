@@ -11,20 +11,23 @@ import sepahImage from "../../assets/sepah.png";
 
 function Main() {
   return (
-    <div className="flex flex-col justify-between h-screen p-4">
-        <div className='flex justify-center items-center'>
+    <div className="flex flex-col justify-between h-screen p-4 bg-yellow-300">
+        <div className='flex justify-center items-center p-6'>
           <img
-            className='img-1 rounded-full'
+            id='img-1'
+            className=''
             src="https://navideshahed.com/files/fa/news/1398/8/26/452178_963.jpg"
             alt="" />
-          <img
-              src={sepahImage}
-              alt=""
-              className="img-2"
-            />
             <img
+            id='img-2'
+                src={sepahImage}
+                alt=""
+                className=""
+              />
+            <img
+            id='img-3'
             src="https://cdn.eghtesadnews.com/thumbnail/IiPKnTRCDCMl/mW4TY_vzMeEG1fqb61-mcCKrGYGcOSm4SW9Yyhl5b2N1qvFeEPKLcFkzrdrrAcG9cg9gAf9kJWJmze2Es8GZhDlkJqwVKQrtPzxEA1UNWUA,/fi7LR8LxLPGN.jpg"
-            alt="" className="img-3 rounded-full" />
+            alt="" className="rounded-2xl" />
         </div>
         <div className="flex flex-col gap-2  rounded-2xl">
           <div className="flex justify-center font-bold text-4xl bg-green-900 text-yellow-500 p-8 rounded-xl">

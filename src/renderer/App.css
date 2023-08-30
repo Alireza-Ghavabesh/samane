@@ -26,15 +26,23 @@
 
 
 
-.img-1{
+#img-1{
+  object-fit: contain;
   height: 55vh;
+  width: 33%;
+  border-radius: 50%;
 }
 
-.img-2{
+#img-2{
+  object-fit: contain;
   height: 55vh;
+  width: 33%;
 }
-.img-3{
+#img-3{
+  object-fit: contain;
   height: 55vh;
+  width: 33%;
+  border-radius: 50%;
 }
 
 /* img-div{
