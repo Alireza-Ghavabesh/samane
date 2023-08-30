@@ -64,7 +64,7 @@ export default function Search() {
                   <td className="border p-2">{user.birth_date}</td>
                   <td className="border p-2">{user.address}</td>
                   <td className="border p-2">{user.mobile}</td>
-                  <td className="flex border p-2 justify-center flex-col">
+                  <td className="flex border justify-center flex-col">
                     <img
                       src="https://www.dehkadehquran.ir/wp-content/uploads/elementor/thumbs/-دوره-تجوید-سطح-یک-2-q7mjcu57kej5rjxenma7f838pldfoba387fb85knre.jpg"
                       alt=""
