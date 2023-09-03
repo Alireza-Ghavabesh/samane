@@ -2,16 +2,17 @@
 /* eslint-disable prettier/prettier */
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { ReactComponent as Next } from './../../../assets/icons/left-angle-arrow-outline-icon.svg';
+import { ReactComponent as Back } from './../../../assets/icons/right-angle-arrow-outline-icon.svg';
 
 export default function Search() {
-
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     window.electron.ipcRenderer.removeAllListenersGetUsers();
     window.electron.ipcRenderer.onGetUsers((event, value) => {
-      console.log(value.users);
+      console.log(value.users.length);
       setUsers(value.users);
     });
     window.electron.ipcRenderer.invokeGetUsers({ term: searchTerm });
@@ -40,7 +41,6 @@ export default function Search() {
           // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus
           // eslint-disable-next-line jsx-a11y/no-autofocus
-
         />
       </div>
       <div dir="rtl" className="p-4">
@@ -58,23 +58,36 @@ export default function Search() {
           <tbody>
             {users.length > 0 &&
               users.map((user, index) => (
-                <tr key={user.id} id={String(index)}>
-                  <td className="border p-2">{user.full_name}</td>
-                  <td className="border p-2">{user.national_code}</td>
-                  <td className="border p-2">{user.birth_date}</td>
-                  <td className="border p-2">{user.address}</td>
-                  <td className="border p-2">{user.mobile}</td>
+                <tr key={JSON.parse(user.record).user_id} id={String(index)}>
+                  <td className="border p-2">
+                    {JSON.parse(user.record).full_name}
+                  </td>
+                  <td className="border p-2">
+                    {JSON.parse(user.record).national_code}
+                  </td>
+                  <td className="border p-2">
+                    {JSON.parse(user.record).birth_date}
+                  </td>
+                  <td className="border p-2">
+                    {JSON.parse(user.record).address}
+                  </td>
+                  <td className="border p-2">
+                    {JSON.parse(user.record).mobile}
+                  </td>
                   <td className="flex border justify-center flex-col">
-                    <img
-                      src="https://www.dehkadehquran.ir/wp-content/uploads/elementor/thumbs/-دوره-تجوید-سطح-یک-2-q7mjcu57kej5rjxenma7f838pldfoba387fb85knre.jpg"
-                      alt=""
-                      width={272}
-                      height={161}
-                      className='w-full'
-                    />
-                    <div className='flex flex-row justify-around'>
-                      <span className='text-4xl bg-green-700 w-1/2'>&#8594;</span>
-                      <span className='text-4xl bg-green-300 w-1/2'>&#8592;</span>
+                    <div className="flex justify-around">
+                      <div className="block m-auto">
+                        <Back className="w-10" />
+                      </div>
+                      <img
+                        src={require(`../../../pictures/1742909973/horizon-call-of-the-mountain-vr-game-hd-wallpaper-uhdpaper.com-804@0@i.jpg`)}
+                        alt=""
+                        className=""
+                        width={400}
+                      />
+                      <div className="block m-auto">
+                        <Next className="w-10" />
+                      </div>
                     </div>
                   </td>
                 </tr>

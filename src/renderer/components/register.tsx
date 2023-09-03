@@ -61,25 +61,25 @@ export default function Register() {
     });
 
     // if (IsImagechoosed) {
-      window.electron.ipcRenderer.registerUserInfo({
-        op_type: 'info',
-        info: {
-          fullName,
-          nationalCode,
-          year,
-          month,
-          day,
-          address,
-          mobile,
-        },
-      });
-      console.log(fullName);
-      console.log(nationalCode);
-      console.log(year);
-      console.log(month);
-      console.log(day);
-      console.log(address);
-      console.log(mobile);
+    window.electron.ipcRenderer.registerUserInfo({
+      op_type: 'info',
+      info: {
+        fullName,
+        nationalCode,
+        year,
+        month,
+        day,
+        address,
+        mobile,
+      },
+    });
+    console.log(fullName);
+    console.log(nationalCode);
+    console.log(year);
+    console.log(month);
+    console.log(day);
+    console.log(address);
+    console.log(mobile);
     // } else {
     //   alert('تصویر انتخاب نکرده اید!');
     // }

@@ -8,7 +8,8 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import path from 'path';
+import path, { basename } from 'path';
+import fs from 'fs';
 import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -23,6 +24,22 @@ class AppUpdater {
     autoUpdater.logger = log;
     autoUpdater.checkForUpdatesAndNotify();
   }
+}
+
+function copyFileFromDatabase(FILEPATH, DEST) {
+  let src = FILEPATH;
+  // fs.mkdir(national_code);
+  let national_code = DEST;
+  let dest = `${national_code}/${basename(src)}`;
+  if (!fs.existsSync(`${national_code}`)) {
+    fs.mkdirSync(`${national_code}`, { recursive: true });
+  }
+
+  // eslint-disable-next-line camelcase
+  fs.copyFile(src, dest, (err) => {
+    if (err) throw err;
+    console.log('op successfull');
+  });
 }
 
 let mainWindow: BrowserWindow;
@@ -126,7 +143,7 @@ const db = new sqlite3.Database(`basij.db`);
 
 // const uuid = crypto.randomUUID();
 db.run(`CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY,
+  user_id INTEGER PRIMARY KEY,
   full_name TEXT,
   national_code TEXT,
   birth_date TEXT,
@@ -134,10 +151,10 @@ db.run(`CREATE TABLE IF NOT EXISTS users (
   mobile TEXT
 )`);
 db.run(`CREATE TABLE IF NOT EXISTS images (
-  id INTEGER,
+  image_id INTEGER,
   user_id TEXT NOT NULL,
   full_path TEXT NOT NULL,
-  PRIMARY KEY (id),
+  PRIMARY KEY (image_id),
   FOREIGN KEY (user_id)
       REFERENCES users (id)
         ON DELETE CASCADE
@@ -177,26 +194,34 @@ ipcMain.handle('register-user-info', async (event, args) => {
           OK = false;
           console.log(err);
         } else {
-          if(uploadedFiles === undefined){
+          if (uploadedFiles === undefined) {
             uploadedFiles = [];
+          }
+          if (uploadedFiles.length > 0) {
+            uploadedFiles.forEach((file_path) => {
+              // copy file in images folder
+              copyFileFromDatabase(
+                file_path,
+                `pictures/${args.info.nationalCode}`
+              );
+              db.run(
+                `
+              INSERT INTO images (user_id, full_path)
+              VALUES (?, ?)
+              `,
+                // eslint-disable-next-line camelcase
+                [this.lastID, file_path],
+                function (err) {
+                  if (err) {
+                    OK = false;
+                  }
+                }
+              );
+            });
           }
           // eslint-disable-next-line camelcase
           // eslint-disable-next-line camelcase
-          uploadedFiles.forEach((file_path) => {
-            db.run(
-              `
-            INSERT INTO images (user_id, full_path)
-            VALUES (?, ?)
-            `,
-              // eslint-disable-next-line camelcase
-              [this.lastID, file_path],
-              function (err) {
-                if (err) {
-                  OK = false;
-                }
-              }
-            );
-          });
+
           if (OK) {
             mainWindow.webContents.send('result-register', { status: 'OK' });
           }
@@ -209,24 +234,21 @@ ipcMain.handle('register-user-info', async (event, args) => {
 ipcMain.handle('invoke-get-users', async (event, args) => {
   console.log(args.term);
   if (args.term === '') {
-    db.all(`select * from users`, [], (err, rows) => {
-      if (err) {
-        console.log(err);
-      } else {
-        // console.log(rows);
-        // rows.forEach((row) => {
-        //   console.log(row.name);
-        // });
-        mainWindow.webContents.send('get-users', { users: rows });
-      }
-    });
-  } else {
     db.all(
-      `select * from users where full_name like '%${args.term}%'
-      or national_code like '%${args.term}%'
-      or birth_date like '%${args.term}%'
-      or address like '%${args.term}%'
-      `,
+      `
+    SELECT json_object(
+      'user_id', user_id,
+      'full_name', full_name,
+      'national_code', national_code,
+      'mobile', mobile,
+      'address', address,
+      'birth_date', birth_date,
+      'images'
+      , (SELECT json_group_array(json_object('image_id', imgs.image_id, 'full_path', imgs.full_path))
+        FROM images AS imgs
+        WHERE imgs.user_id = usrs.user_id)) AS record
+      FROM users AS usrs;
+    `,
       [],
       (err, rows) => {
         if (err) {
@@ -240,8 +262,54 @@ ipcMain.handle('invoke-get-users', async (event, args) => {
         }
       }
     );
+  } else {
+    db.all(
+      `
+      SELECT json_object(
+      'user_id', user_id,
+      'full_name', full_name,
+      'national_code', national_code,
+      'mobile', mobile,
+      'address', address,
+      'birth_date', birth_date,
+      'images'
+      , (SELECT json_group_array(json_object('image_id', imgs.image_id, 'full_path', imgs.full_path))
+        FROM images AS imgs
+        WHERE imgs.user_id = usrs.user_id)) AS record
+      FROM users AS usrs
+      where
+      usrs.full_name like '%${args.term}%'
+      or usrs.national_code like '%${args.term}%'
+      or usrs.birth_date like '%${args.term}%'
+      or usrs.address like '%${args.term}%'
+      or usrs.mobile like '%${args.term}%'
+      ;
+      `,
+      [],
+      (err, rows) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(rows);
+
+          mainWindow.webContents.send('get-users', {
+            users: rows,
+          });
+        }
+      }
+    );
   }
 });
+
+// select * from users where users.full_name like '%${args.term}%'
+// or users.national_code like '%${args.term}%'
+// or users.birth_date like '%${args.term}%'
+// or users.address like '%${args.term}%'
+// or users.mobile like '%${args.term}%'
+
+// ipcMain.handle('get-pictures', async (event, args) => {
+//   // args
+// });
 
 /**
  * Add event listeners...

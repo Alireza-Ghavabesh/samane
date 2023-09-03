@@ -28,6 +28,7 @@ const electronHandler = {
     onGetUsers: (callback) => ipcRenderer.once('get-users', callback),
     removeAllListenersGetUsers: () =>
       ipcRenderer.removeAllListeners('get-users'),
+    // getUserPictures: ipcRenderer.invoke('get-pictures', args),
   },
 };
 
