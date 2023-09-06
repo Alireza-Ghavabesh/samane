@@ -8,24 +8,18 @@ import Register from './components/register';
 import Search from './components/search';
 import IRANSansWeb from '../../assets/fonts/IRANSansWeb.woff2';
 import sepahImage from '../../assets/sepah.png';
+import sardar_soleymani from './../../assets/soleimani.jpg';
+import sardar_narimi from './../../assets/narimi.jpg';
+import { transitions, positions, Provider as AlertProvider } from 'react-alert';
+import AlertTemplate from 'react-alert-template-basic';
 
 function Main() {
   return (
     <div className="flex flex-col justify-between h-screen p-4 bg-yellow-300">
       <div className="flex justify-center items-center p-6">
-        <img
-          id="img-1"
-          className=""
-          src="https://navideshahed.com/files/fa/news/1398/8/26/452178_963.jpg"
-          alt=""
-        />
+        <img id="img-1" className="" src={sardar_narimi} alt="" />
         <img id="img-2" src={sepahImage} alt="" className="" />
-        <img
-          id="img-3"
-          src="https://cdn.eghtesadnews.com/thumbnail/IiPKnTRCDCMl/mW4TY_vzMeEG1fqb61-mcCKrGYGcOSm4SW9Yyhl5b2N1qvFeEPKLcFkzrdrrAcG9cg9gAf9kJWJmze2Es8GZhDlkJqwVKQrtPzxEA1UNWUA,/fi7LR8LxLPGN.jpg"
-          alt=""
-          className="rounded-2xl"
-        />
+        <img id="img-3" src={sardar_soleymani} alt="" className="rounded-2xl" />
       </div>
       <div className="flex flex-col gap-2  rounded-2xl">
         <div className="flex justify-center font-bold text-4xl bg-green-900 text-yellow-500 p-8 rounded-xl">
@@ -70,17 +64,30 @@ const theme = createTheme({
   },
 });
 
+// optional configuration
+const options = {
+  // you can also just use 'bottom center'
+  position: positions.BOTTOM_CENTER,
+  timeout: 5000,
+  offset: '30px',
+  // you can also just use 'scale'
+  transition: transitions.SCALE,
+};
+
 export default function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Routes>
-          <Route path="/" element={<Main />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/search" element={<Search />} />
-        </Routes>
-      </Router>
-    </ThemeProvider>
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <AlertProvider template={AlertTemplate} {...options}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Router>
+          <Routes>
+            <Route path="/" element={<Main />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/search" element={<Search />} />
+          </Routes>
+        </Router>
+      </ThemeProvider>
+    </AlertProvider>
   );
 }

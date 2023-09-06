@@ -42,6 +42,12 @@ function copyFileFromDatabase(FILEPATH, DEST) {
   });
 }
 
+function getPicturesPath() {
+  return `${__dirname.split('\\src')[0]}\\pictures`;
+}
+
+getPicturesPath();
+
 let mainWindow: BrowserWindow;
 
 ipcMain.on('ipc-example', async (event, arg) => {
@@ -98,6 +104,7 @@ const createWindow = async () => {
     minHeight: 720,
     icon: getAssetPath('icon.png'),
     webPreferences: {
+      webSecurity: false,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
@@ -152,8 +159,10 @@ db.run(`CREATE TABLE IF NOT EXISTS users (
 )`);
 db.run(`CREATE TABLE IF NOT EXISTS images (
   image_id INTEGER,
-  user_id TEXT NOT NULL,
-  full_path TEXT NOT NULL,
+  user_id INTEGER,
+  full_path_src TEXT NOT NULL,
+  original NOT NULL,
+  thumbnail NOT NULL,
   PRIMARY KEY (image_id),
   FOREIGN KEY (user_id)
       REFERENCES users (id)
@@ -188,6 +197,7 @@ ipcMain.handle('register-user-info', async (event, args) => {
         args.info.mobile,
       ],
       function (err) {
+        let picturesPath = getPicturesPath();
         let OK = true;
         if (err) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -206,11 +216,21 @@ ipcMain.handle('register-user-info', async (event, args) => {
               );
               db.run(
                 `
-              INSERT INTO images (user_id, full_path)
-              VALUES (?, ?)
+              INSERT INTO images (user_id, original, thumbnail, full_path_src)
+              VALUES (?, ?, ?, ?)
               `,
                 // eslint-disable-next-line camelcase
-                [this.lastID, file_path],
+                [
+                  this.lastID,
+                  `${picturesPath}\\${args.info.nationalCode}\\${basename(
+                    file_path
+                  )}`,
+                  `${picturesPath}\\${args.info.nationalCode}\\${basename(
+                    file_path
+                  )}`,
+                  // eslint-disable-next-line camelcase
+                  file_path,
+                ],
                 function (err) {
                   if (err) {
                     OK = false;
@@ -244,8 +264,11 @@ ipcMain.handle('invoke-get-users', async (event, args) => {
       'address', address,
       'birth_date', birth_date,
       'images'
-      , (SELECT json_group_array(json_object('image_id', imgs.image_id, 'full_path', imgs.full_path))
-        FROM images AS imgs
+      , (SELECT json_group_array(json_object('image_id', imgs.image_id,
+      'full_path_src', imgs.full_path_src,
+      'original', imgs.original,
+      'thumbnail', imgs.thumbnail
+      )) FROM images AS imgs
         WHERE imgs.user_id = usrs.user_id)) AS record
       FROM users AS usrs;
     `,
@@ -254,10 +277,7 @@ ipcMain.handle('invoke-get-users', async (event, args) => {
         if (err) {
           console.log(err);
         } else {
-          // console.log(rows);
-          // rows.forEach((row) => {
-          //   console.log(row.name);
-          // });
+          console.log(rows);
           mainWindow.webContents.send('get-users', { users: rows });
         }
       }
@@ -273,7 +293,11 @@ ipcMain.handle('invoke-get-users', async (event, args) => {
       'address', address,
       'birth_date', birth_date,
       'images'
-      , (SELECT json_group_array(json_object('image_id', imgs.image_id, 'full_path', imgs.full_path))
+      , (SELECT json_group_array(json_object('image_id', imgs.image_id,
+      'full_path_src', imgs.full_path_src,
+      'original', imgs.original,
+      'thumbnail', imgs.thumbnail
+      ))
         FROM images AS imgs
         WHERE imgs.user_id = usrs.user_id)) AS record
       FROM users AS usrs

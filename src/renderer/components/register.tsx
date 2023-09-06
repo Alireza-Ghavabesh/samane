@@ -89,7 +89,7 @@ export default function Register() {
     <div className="flex p-4 gap-4 justify-between h-screen bg-emerald-700">
       <Link
         to="/"
-        className="bg-yellow-400 text-2xl p-2 rounded-xl h-fit min-w-fit border-black border-4"
+        className="bg-yellow-400 text-2xl hover:bg-emerald-800 p-2 rounded-xl h-fit min-w-fit border-black border-4"
       >
         بازگشت
       </Link>
