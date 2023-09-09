@@ -331,9 +331,9 @@ ipcMain.handle('invoke-get-users', async (event, args) => {
 // or users.address like '%${args.term}%'
 // or users.mobile like '%${args.term}%'
 
-// ipcMain.handle('get-pictures', async (event, args) => {
-//   // args
-// });
+ipcMain.handle('update-user', async (event, args) => {
+  // args
+});
 
 /**
  * Add event listeners...
