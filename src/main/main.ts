@@ -333,6 +333,29 @@ ipcMain.handle('invoke-get-users', async (event, args) => {
 
 ipcMain.handle('update-user', async (event, args) => {
   // args
+  const sql = `
+    UPDATE users SET full_name = ? ,
+    national_code = ? ,
+    birth_date = ? ,
+    address = ? ,
+    mobile = ?
+    WHERE user_id = ?
+  `;
+  const data = [
+    args.fullName,
+    args.nationalCode,
+    args.birthDate,
+    args.address,
+    args.mobile,
+    args.user_id,
+  ];
+  db.run(sql, data, function (err) {
+    if (err) {
+      return console.error(err.message);
+    } else {
+      console.log(`Row(s) updated: ${this.changes}`);
+    }
+  });
 });
 
 /**

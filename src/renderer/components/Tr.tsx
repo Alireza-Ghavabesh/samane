@@ -1,27 +1,15 @@
 /* eslint-disable */
 import { useAlert } from 'react-alert';
-import { useEffect, useState, useRef } from 'react';
+import { useRef } from 'react';
 import Gallery from './gallrey';
 import iconSave from '../../../assets/Save.512.png';
 
 export default function Tr(props) {
   const alert = useAlert();
-  const [fullname, setFullname] = useState('');
-  const [address, setAddress] = useState('');
-  const [mobile, setMobile] = useState('');
-  const [nationalcode, setNationalcode] = useState('');
-  const [birthDate, setBirthDate] = useState('');
 
   const TrRef = useRef(null);
 
   const testAlert = () => {
-    // console.log({
-    //   fullname,
-    //   address,
-    //   birthDate,
-    //   mobile,
-    //   nationalcode,
-    // });
     let user_id = TrRef.current.id;
     let fullName = TrRef.current.childNodes[0].textContent;
     let nationalCode = TrRef.current.childNodes[1].textContent;
@@ -36,24 +24,24 @@ export default function Tr(props) {
       address: address,
       mobile: mobile,
     };
-    // window.electron.ipcRenderer.invokeUpdateUser(newInfo);
+    window.electron.ipcRenderer.invokeUpdateUser(newInfo);
     console.log(newInfo);
-    // alert.show('تغییرات با موفقیت دخیره شد', {
-    //   timeout: 1500, // custom timeout just for this one alert
-    //   type: 'success',
-    //   onOpen: () => {
-    //     console.log('hey');
-    //   }, // callback that will be executed after this alert open
-    //   onClose: () => {
-    //     console.log('closed');
-    //   }, // callback that will be executed after this alert is removed
-    // });
+    alert.show('تغییرات با موفقیت دخیره شد', {
+      timeout: 1500, // custom timeout just for this one alert
+      type: 'success',
+      onOpen: () => {
+        console.log('hey');
+      }, // callback that will be executed after this alert open
+      onClose: () => {
+        console.log('closed');
+      }, // callback that will be executed after this alert is removed
+    });
   };
 
   return (
     <tr
       key={props.user.user_id}
-      id={String(props.index)}
+      id={props.user.user_id}
       className="odd:bg-gray-100"
       ref={TrRef}
     >
