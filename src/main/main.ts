@@ -10,11 +10,10 @@
  */
 import path, { basename } from 'path';
 import fs from 'fs';
-import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog, protocol } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 // import crypto from 'crypto';
-import sqlite3 from 'sqlite3';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -27,10 +26,10 @@ class AppUpdater {
 }
 
 function copyFileFromDatabase(FILEPATH, DEST) {
-  let src = FILEPATH;
+  const src = FILEPATH;
   // fs.mkdir(national_code);
-  let national_code = DEST;
-  let dest = `${national_code}/${basename(src)}`;
+  const national_code = DEST;
+  const dest = `${national_code}/${basename(src)}`;
   if (!fs.existsSync(`${national_code}`)) {
     fs.mkdirSync(`${national_code}`, { recursive: true });
   }
@@ -45,8 +44,6 @@ function copyFileFromDatabase(FILEPATH, DEST) {
 function getPicturesPath() {
   return `${__dirname.split('\\src')[0]}\\pictures`;
 }
-
-getPicturesPath();
 
 let mainWindow: BrowserWindow;
 
@@ -102,13 +99,24 @@ const createWindow = async () => {
     height: 720,
     minWidth: 1280,
     minHeight: 720,
-    icon: getAssetPath('icon.png'),
+    icon: getAssetPath('sepah-blue.png'),
     webPreferences: {
-      webSecurity: false,
+      webSecurity: true,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
+  });
+
+  mainWindow.removeMenu();
+
+  // eslint-disable-next-line promise/catch-or-return
+  app.whenReady().then(() => {
+    protocol.registerFileProtocol('atom', (request, callback) => {
+      console.log(request.url);
+      const url = request.url.substr(7);
+      callback({ path: url });
+    });
   });
 
   // mainWindow.setResizable(false);
@@ -131,8 +139,8 @@ const createWindow = async () => {
 
   // eslint-disable-next-line consistent-return, @typescript-eslint/no-unused-vars
 
-  const menuBuilder = new MenuBuilder(mainWindow);
-  menuBuilder.buildMenu();
+  // const menuBuilder = new MenuBuilder(mainWindow);
+  // menuBuilder.buildMenu();
 
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
@@ -144,9 +152,10 @@ const createWindow = async () => {
   // eslint-disable-next-line
   new AppUpdater();
 };
-
 // const uuid = crypto.randomUUID();
-const db = new sqlite3.Database(`basij.db`);
+const sqlite3 = require('sqlite3').verbose();
+
+const db = new sqlite3.Database('basij.db');
 
 // const uuid = crypto.randomUUID();
 db.run(`CREATE TABLE IF NOT EXISTS users (
@@ -183,6 +192,47 @@ ipcMain.handle('register-user-info', async (event, args) => {
     if (!canceled) {
       return filePaths[0];
     }
+  } else if (args.op_type === 'new-images') {
+    const picturesPath = getPicturesPath();
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ['multiSelections'],
+    });
+    // do save
+    uploadedFiles = filePaths;
+    if (uploadedFiles.length > 0) {
+      let OK = true;
+      uploadedFiles.forEach((file_path) => {
+        // copy file in images folder
+        copyFileFromDatabase(file_path, `pictures/${args.nationalCode}`);
+        db.run(
+          `
+        INSERT INTO images (user_id, original, thumbnail, full_path_src)
+        VALUES (?, ?, ?, ?)
+        `,
+          // eslint-disable-next-line camelcase
+          [
+            args.user_id,
+            `${picturesPath}\\${args.nationalCode}\\${basename(file_path)}`,
+            `${picturesPath}\\${args.nationalCode}\\${basename(file_path)}`,
+            // eslint-disable-next-line camelcase
+            file_path,
+          ],
+          function (err) {
+            if (err) {
+              OK = false;
+            } else {
+              OK = true;
+            }
+          }
+        );
+      });
+    }
+
+    // after all makes it empty
+    uploadedFiles = [];
+    if (!canceled) {
+      return filePaths[0];
+    }
   } else {
     db.run(
       `
@@ -197,7 +247,7 @@ ipcMain.handle('register-user-info', async (event, args) => {
         args.info.mobile,
       ],
       function (err) {
-        let picturesPath = getPicturesPath();
+        const picturesPath = getPicturesPath();
         let OK = true;
         if (err) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -243,6 +293,7 @@ ipcMain.handle('register-user-info', async (event, args) => {
           // eslint-disable-next-line camelcase
 
           if (OK) {
+            uploadedFiles = [];
             mainWindow.webContents.send('result-register', { status: 'OK' });
           }
         }
@@ -352,9 +403,8 @@ ipcMain.handle('update-user', async (event, args) => {
   db.run(sql, data, function (err) {
     if (err) {
       return console.error(err.message);
-    } else {
-      console.log(`Row(s) updated: ${this.changes}`);
     }
+    console.log(`Row(s) updated: ${this.changes}`);
   });
 });
 

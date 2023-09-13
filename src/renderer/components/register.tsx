@@ -1,10 +1,10 @@
 /* eslint-disable react/button-has-type */
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { useAlert } from 'react-alert';
+import { toast } from 'react-toastify';
+import IRANSansWeb from './../../../assets/fonts/IRANSansWeb.woff2';
 
 export default function Register() {
-  const alert = useAlert();
   const [fullName, setFullName] = useState('');
   const [nationalCode, setNationalCode] = useState('');
   const [year, setYear] = useState('');
@@ -52,19 +52,16 @@ export default function Register() {
 
   function registerUserInfo(e) {
     e.preventDefault();
-
+    window.electron.ipcRenderer.removeAllListenersResultRegister();
     window.electron.ipcRenderer.onResultRegister((event, value) => {
       if (value.status === 'OK') {
-        console.log('اطلاعات با موفقیت ثبت شد');
-        alert.show('تغییرات با موفقیت دخیره شد', {
-          timeout: 1500, // custom timeout just for this one alert
-          type: 'success',
-          onOpen: () => {
-            console.log('hey');
-          }, // callback that will be executed after this alert open
-          onClose: () => {
-            console.log('closed');
-          }, // callback that will be executed after this alert is removed
+        console.log(value.status);
+        toast.success('اطلاعات ذخیره شد', {
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 1000,
+          style: {
+            fontFamily: 'IRANSansWeb',
+          },
         });
       }
     });

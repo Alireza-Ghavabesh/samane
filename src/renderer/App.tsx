@@ -4,14 +4,14 @@ import { MemoryRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import './dist/output.css';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Register from './components/register';
 import Search from './components/search';
 import IRANSansWeb from '../../assets/fonts/IRANSansWeb.woff2';
 import sepahImage from '../../assets/sepah.png';
 import sardar_soleymani from './../../assets/soleimani.jpg';
 import sardar_narimi from './../../assets/narimi.jpg';
-import { transitions, positions, Provider as AlertProvider } from 'react-alert';
-import AlertTemplate from 'react-alert-template-basic';
 
 function Main() {
   return (
@@ -22,14 +22,14 @@ function Main() {
         <img id="img-3" src={sardar_soleymani} alt="" className="rounded-2xl" />
       </div>
       <div className="flex flex-col gap-2  rounded-2xl">
-        <div className="flex justify-center font-bold text-4xl bg-green-900 text-yellow-500 p-8 rounded-xl">
+        <div className="flex justify-center font-bold text-4xl bg-green-900 text-yellow-500 p-8 rounded-xl ">
           پایگاه مقاومت بسیج شهید مهدی نریمی
         </div>
         <div className=" flex gap-2">
           <div className="w-1/2 bg-amber-700 rounded-2xl">
             <Link
               to="/search"
-              className="w-full text-white flex justify-center p-4 items-center hover:bg-slate-200 font-bold text-2xl"
+              className="w-full text-white flex justify-center p-4 items-center hover:bg-slate-200 font-bold text-2xl outline-none"
             >
               جستجو در اطلاعات ثبت شده
             </Link>
@@ -37,7 +37,7 @@ function Main() {
           <div className="w-1/2  bg-blue-500 rounded-2xl">
             <Link
               to="/register"
-              className="w-full text-white flex justify-center p-4 items-center hover:bg-slate-200 font-bold text-2xl"
+              className="w-full text-white flex justify-center p-4 items-center hover:bg-slate-200 font-bold text-2xl outline-none"
             >
               ثبت اطلاعات جدید
             </Link>
@@ -65,29 +65,20 @@ const theme = createTheme({
 });
 
 // optional configuration
-const options = {
-  // you can also just use 'bottom center'
-  position: positions.BOTTOM_CENTER,
-  timeout: 5000,
-  offset: '30px',
-  // you can also just use 'scale'
-  transition: transitions.SCALE,
-};
 
 export default function App() {
   return (
     // eslint-disable-next-line react/jsx-props-no-spreading
-    <AlertProvider template={AlertTemplate} {...options}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Router>
-          <Routes>
-            <Route path="/" element={<Main />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/search" element={<Search />} />
-          </Routes>
-        </Router>
-      </ThemeProvider>
-    </AlertProvider>
+    <ThemeProvider theme={theme}>
+      <ToastContainer />
+      <CssBaseline />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Main />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/search" element={<Search />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }

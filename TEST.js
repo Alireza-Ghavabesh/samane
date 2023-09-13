@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 const fs = require('fs');
-const path = require('path');
 const { basename } = require('path');
 
 function copyFileFromDatabase(FILEPATH, DEST) {

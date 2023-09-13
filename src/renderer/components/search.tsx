@@ -1,10 +1,11 @@
 /* eslint-disable */
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-
 import Tr from './Tr';
+import moreImage from './../../../assets/more-image.png';
 
 export default function Search() {
+  const [isShown, setIsShown] = useState(false);
   // for users
   const [users, setUsers] = useState([]);
   // for search
@@ -13,13 +14,13 @@ export default function Search() {
   useEffect(() => {
     window.electron.ipcRenderer.removeAllListenersGetUsers();
     window.electron.ipcRenderer.onGetUsers((event, value) => {
-      let tempUsers = [];
+      let tempUsers: any = [];
       value.users.forEach((user) => {
         const userImages: { original: string; thumbnail: string }[] = [];
         const parsedUser = JSON.parse(user.record);
         parsedUser.images.forEach((image) => {
           const img = {
-            src: `file:///${image.original}`,
+            src: `atom://${image.original}`,
           };
           userImages.push(img);
         });
@@ -75,7 +76,10 @@ export default function Search() {
               <th className="border-4 p-2">آدرس</th>
               <th className="border-4 p-2">شماره همراه</th>
               <th className="border-4 p-2">تصاویر</th>
-              <th className="border-4 p-2">ذخیره</th>
+              <th className="border-4 p-2">ویرایش</th>
+              <th className="border-4 p-2 flex justify-center">
+                <img src={moreImage} width={30} alt="" />
+              </th>
             </tr>
           </thead>
           <tbody>

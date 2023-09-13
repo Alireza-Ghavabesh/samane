@@ -1,6 +1,7 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { basename } from 'path';
 
 export type Channels = 'ipc-example';
 
@@ -28,7 +29,13 @@ const electronHandler = {
     onGetUsers: (callback) => ipcRenderer.once('get-users', callback),
     removeAllListenersGetUsers: () =>
       ipcRenderer.removeAllListeners('get-users'),
+    removeAllListenersResultRegister: () =>
+      ipcRenderer.removeAllListeners('result-register'),
     invokeUpdateUser: (args: any) => ipcRenderer.invoke('update-user', args),
+    onResultNewImages: (callback) =>
+      ipcRenderer.on('new-upload-images', callback),
+    removeAllListenersResultNewImages: () =>
+      ipcRenderer.removeAllListeners('new-upload-images'),
   },
 };
 

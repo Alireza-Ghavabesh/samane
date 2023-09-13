@@ -1,15 +1,15 @@
 /* eslint-disable */
-import { useAlert } from 'react-alert';
-import { useRef } from 'react';
+
+import { useRef, useState } from 'react';
 import Gallery from './gallrey';
 import iconSave from '../../../assets/Save.512.png';
+import { toast } from 'react-toastify';
+import IRANSansWeb from './../../../assets/fonts/IRANSansWeb.woff2';
 
 export default function Tr(props) {
-  const alert = useAlert();
-
   const TrRef = useRef(null);
-
-  const testAlert = () => {
+  const [newImagesAdded, setNewImagesAdded] = useState(false);
+  const notify = () => {
     let user_id = TrRef.current.id;
     let fullName = TrRef.current.childNodes[0].textContent;
     let nationalCode = TrRef.current.childNodes[1].textContent;
@@ -26,15 +26,23 @@ export default function Tr(props) {
     };
     window.electron.ipcRenderer.invokeUpdateUser(newInfo);
     console.log(newInfo);
-    alert.show('تغییرات با موفقیت دخیره شد', {
-      timeout: 1500, // custom timeout just for this one alert
-      type: 'success',
-      onOpen: () => {
-        console.log('hey');
-      }, // callback that will be executed after this alert open
-      onClose: () => {
-        console.log('closed');
-      }, // callback that will be executed after this alert is removed
+    toast.success('تغییرات ذخیره شد', {
+      position: toast.POSITION.TOP_RIGHT,
+      autoClose: 1000,
+      style: {
+        fontFamily: 'IRANSansWeb',
+      },
+    });
+  };
+
+  const addMoreImages = () => {
+    let user_id = TrRef.current.id;
+    let nationalCode = TrRef.current.childNodes[1].textContent;
+
+    window.electron.ipcRenderer.registerUserInfo({
+      op_type: 'new-images',
+      user_id: user_id,
+      nationalCode: nationalCode,
     });
   };
 
@@ -60,11 +68,17 @@ export default function Tr(props) {
       <td className="border-4 p-2 outline-none" contentEditable>
         {props.user.mobile}
       </td>
-      <td className="bg-orange-400 p-2 border-4 hover:bg-orange-600">
-        <Gallery images={props.user.images} name="تصاویر" />
+      <td className="bg-orange-400 border-4 hover:bg-orange-600 ">
+        <Gallery images={props.user.images} name="تصاویر" className="" />
       </td>
-      <td className="m-auto w-12 hover:bg-gray-600" onClick={testAlert}>
+      <td className="m-auto w-12 hover:bg-gray-600" onClick={notify}>
         <img src={iconSave} alt="" className="cursor-pointer" />
+      </td>
+      <td
+        className="border-4 p-2 outline-none text-4xl hover:transition  hover:bg-slate-700 cursor-pointer "
+        onClick={addMoreImages}
+      >
+        +
       </td>
     </tr>
   );
