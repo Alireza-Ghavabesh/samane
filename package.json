@@ -1,17 +1,5 @@
 {
   "name": "basij",
-  "description": "A foundation for scalable desktop apps",
-  "keywords": [
-    "electron",
-    "boilerplate",
-    "react",
-    "typescript",
-    "ts",
-    "sass",
-    "webpack",
-    "hot",
-    "reload"
-  ],
   "homepage": "https://github.com/Alireza-Ghavabesh/basij/basij#readme",
   "bugs": {
     "url": "https://github.com/Alireza-Ghavabesh/basij/issues"
@@ -47,53 +35,6 @@
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "jest"
-  },
-  "browserslist": [],
-  "prettier": {
-    "singleQuote": true,
-    "overrides": [
-      {
-        "files": [
-          ".prettierrc",
-          ".eslintrc"
-        ],
-        "options": {
-          "parser": "json"
-        }
-      }
-    ]
-  },
-  "jest": {
-    "moduleDirectories": [
-      "node_modules",
-      "release/app/node_modules",
-      "src"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "jsx",
-      "ts",
-      "tsx",
-      "json"
-    ],
-    "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/.erb/mocks/fileMock.js",
-      "\\.(css|less|sass|scss)$": "identity-obj-proxy"
-    },
-    "setupFiles": [
-      "./.erb/scripts/check-build-exists.ts"
-    ],
-    "testEnvironment": "jsdom",
-    "testEnvironmentOptions": {
-      "url": "http://localhost/"
-    },
-    "testPathIgnorePatterns": [
-      "release/app/dist",
-      ".erb/dll"
-    ],
-    "transform": {
-      "\\.(ts|tsx|js|jsx)$": "ts-jest"
-    }
   },
   "dependencies": {
     "@electron-forge/maker-squirrel": "^6.4.2",
@@ -200,7 +141,8 @@
     "webpack-merge": "^5.9.0"
   },
   "build": {
-    "productName": "ElectronReact",
+    "productName": "سامانه",
+    "icon": "assets/installerIcon.ico",
     "appId": "org.erb.ElectronReact",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
@@ -210,59 +152,29 @@
       "package.json"
     ],
     "afterSign": ".erb/scripts/notarize.js",
-    "mac": {
+    "win": {
       "target": {
         "target": "default",
         "arch": [
-          "arm64",
           "x64",
           "ia32"
         ]
       },
-      "type": "distribution",
-      "hardenedRuntime": true,
-      "entitlements": "assets/entitlements.mac.plist",
-      "entitlementsInherit": "assets/entitlements.mac.plist",
-      "gatekeeperAssess": false
-    },
-    "dmg": {
-      "contents": [
+      "protocols": [
         {
-          "x": 130,
-          "y": 220
-        },
-        {
-          "x": 410,
-          "y": 220,
-          "type": "link",
-          "path": "/Applications"
+          "name": "atom",
+          "schemes": [
+            "atom"
+          ]
         }
-      ]
-    },
-    "win": {
-      "target": [
-        "nsis"
       ]
     },
     "nsis": {
       "allowToChangeInstallationDirectory": true,
-      "oneClick": false
-    },
-    "protocols": [
-      {
-        "name": "atom",
-        "role": "Editor",
-        "schemes": [
-          "irc",
-          "ircs"
-        ]
-      }
-    ],
-    "linux": {
-      "target": [
-        "AppImage"
-      ],
-      "category": "Development"
+      "oneClick": false,
+      "installerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico"
     },
     "directories": {
       "app": "release/app",
@@ -275,15 +187,12 @@
     "publish": {
       "provider": "github",
       "owner": "alireza ghavabesh",
-      "repo": "electron-react-boilerplate"
+      "repo": "basij"
     }
   },
-  "collective": {
-    "url": "https://opencollective.com/electron-react-boilerplate-594"
-  },
   "devEngines": {
-    "node": ">=14.x",
-    "npm": ">=7.x"
+    "node": ">=18.x",
+    "npm": ">=9.x"
   },
   "electronmon": {
     "patterns": [
@@ -291,18 +200,5 @@
       "src/main/**"
     ],
     "logLevel": "quiet"
-  },
-  "config": {
-    "forge": {
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "electron_quick_start"
-          }
-        }
-      ]
-    }
   }
 }

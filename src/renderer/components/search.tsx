@@ -1,19 +1,17 @@
 /* eslint-disable */
-import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import Tr from './Tr';
-import moreImage from './../../../assets/more-image.png';
+import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import Tr from "./Tr";
+import moreImage from "./../../../assets/more-image.png";
 
 function getFilename(fullPath: string) {
-  return fullPath.replace(/^.*[\\\/]/, '');
+  return fullPath.replace(/^.*[\\\/]/, "");
 }
 
 export default function Search() {
-  const [isShown, setIsShown] = useState(false);
-  // for users
   const [users, setUsers] = useState([]);
   // for search
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     window.electron.ipcRenderer.removeAllListenersGetUsers();
@@ -24,7 +22,9 @@ export default function Search() {
         const parsedUser = JSON.parse(user.record);
         parsedUser.images.forEach((image) => {
           const img = {
-            src: `atom:///${image.original}`,
+            src: require(`./../../../pictures/${
+              parsedUser.national_code
+            }/${getFilename(image.original)}`),
           };
           userImages.push(img);
         });

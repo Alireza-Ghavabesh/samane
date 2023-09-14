@@ -8,8 +8,8 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import path, { basename } from 'path';
-import fs from 'fs';
+import path, { basename } from "path";
+import fs from "fs";
 import {
   app,
   BrowserWindow,
@@ -18,12 +18,13 @@ import {
   dialog,
   protocol,
   net,
-} from 'electron';
+} from "electron";
 // import { autoUpdater } from 'electron-updater';
 // import log from 'electron-log';
 // import crypto from 'crypto';
 // import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+
+import { resolveHtmlPath } from "./util";
 
 // class AppUpdater {
 //   constructor() {
@@ -32,6 +33,14 @@ import { resolveHtmlPath } from './util';
 //     autoUpdater.checkForUpdatesAndNotify();
 //   }
 // }
+
+function createPicturesDirIfNotExist() {
+  if (!fs.existsSync(`./pictures`)) {
+    fs.mkdirSync(`./pictures`, { recursive: true });
+  }
+}
+
+createPicturesDirIfNotExist();
 
 function copyFileFromDatabase(FILEPATH, DEST) {
   const src = FILEPATH;
@@ -45,40 +54,40 @@ function copyFileFromDatabase(FILEPATH, DEST) {
   // eslint-disable-next-line camelcase
   fs.copyFile(src, dest, (err) => {
     if (err) throw err;
-    console.log('op successfull');
+    console.log("op successfull");
   });
 }
 
 function getPicturesPath() {
-  return `${__dirname.split('\\src')[0]}\\pictures`;
+  return `${__dirname.split("\\src")[0]}\\pictures`;
 }
 
 let mainWindow: BrowserWindow;
 
-ipcMain.on('ipc-example', async (event, arg) => {
+ipcMain.on("ipc-example", async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+  event.reply("ipc-example", msgTemplate("pong"));
 });
 
 // eslint-disable-next-line consistent-return
 
-if (process.env.NODE_ENV === 'production') {
-  const sourceMapSupport = require('source-map-support');
+if (process.env.NODE_ENV === "production") {
+  const sourceMapSupport = require("source-map-support");
   sourceMapSupport.install();
 }
 
 const isDebug =
-  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+  process.env.NODE_ENV === "development" || process.env.DEBUG_PROD === "true";
 
 if (isDebug) {
-  require('electron-debug')();
+  require("electron-debug")();
 }
 
 const installExtensions = async () => {
-  const installer = require('electron-devtools-installer');
+  const installer = require("electron-devtools-installer");
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions = ['REACT_DEVELOPER_TOOLS'];
+  const extensions = ["REACT_DEVELOPER_TOOLS"];
 
   return installer
     .default(
@@ -94,8 +103,8 @@ const createWindow = async () => {
   }
 
   const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
+    ? path.join(process.resourcesPath, "assets")
+    : path.join(__dirname, "../../assets");
 
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
@@ -107,28 +116,24 @@ const createWindow = async () => {
     height: 720,
     minWidth: 1280,
     minHeight: 720,
-    icon: getAssetPath('sepah-blue.png'),
+    icon: getAssetPath("soleimani.jpg"),
     webPreferences: {
       webSecurity: true,
       preload: app.isPackaged
-        ? path.join(__dirname, 'preload.js')
-        : path.join(__dirname, '../../.erb/dll/preload.js'),
+        ? path.join(__dirname, "preload.js")
+        : path.join(__dirname, "../../.erb/dll/preload.js"),
     },
   });
 
   mainWindow.removeMenu();
 
   // eslint-disable-next-line promise/catch-or-return
-  app.whenReady().then(() => {
-    protocol.handle('atom', (request) =>
-      net.fetch(`file:///${request.url.slice('atom:///'.length)}`)
-    );
-  });
 
   // mainWindow.setResizable(false);
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
 
-  mainWindow.on('ready-to-show', () => {
+  mainWindow.loadURL(resolveHtmlPath("index.html"));
+
+  mainWindow.on("ready-to-show", () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
@@ -139,7 +144,7 @@ const createWindow = async () => {
     }
   });
 
-  mainWindow.on('closed', () => {
+  mainWindow.on("closed", () => {
     mainWindow = null;
   });
 
@@ -151,17 +156,17 @@ const createWindow = async () => {
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
     shell.openExternal(edata.url);
-    return { action: 'deny' };
+    return { action: "deny" };
   });
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
-  new AppUpdater();
+  // new AppUpdater();
 };
 // const uuid = crypto.randomUUID();
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require("sqlite3").verbose();
 
-const db = new sqlite3.Database('basij.db');
+const db = new sqlite3.Database("basij.db");
 
 // const uuid = crypto.randomUUID();
 db.run(`CREATE TABLE IF NOT EXISTS users (
@@ -185,15 +190,15 @@ db.run(`CREATE TABLE IF NOT EXISTS images (
         ON UPDATE NO ACTION
 )`);
 
-ipcMain.handle('invokeNewUserImages', async (event, args) => {
+ipcMain.handle("invokeNewUserImages", async (event, args) => {
   const picturesPath = getPicturesPath();
   const { canceled, filePaths } = await dialog.showOpenDialog({
-    properties: ['multiSelections'],
+    properties: ["multiSelections"],
   });
   if (canceled) {
     console.log(canceled);
-    mainWindow.webContents.send('onResultNewUserImages', {
-      status: 'canceled',
+    mainWindow.webContents.send("onResultNewUserImages", {
+      status: "canceled",
     });
   } else {
     // do save
@@ -226,8 +231,8 @@ ipcMain.handle('invokeNewUserImages', async (event, args) => {
       });
     }
     if (OK) {
-      mainWindow.webContents.send('onResultNewUserImages', {
-        status: 'OK',
+      mainWindow.webContents.send("onResultNewUserImages", {
+        status: "OK",
         num: filePaths.length,
       });
     }
@@ -237,10 +242,10 @@ ipcMain.handle('invokeNewUserImages', async (event, args) => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let uploadedFiles: string[];
 // eslint-disable-next-line consistent-return
-ipcMain.handle('invokeRegisterUserInfo', async (event, args) => {
-  if (args.op_type === 'images') {
+ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
+  if (args.op_type === "images") {
     const { canceled, filePaths } = await dialog.showOpenDialog({
-      properties: ['multiSelections'],
+      properties: ["multiSelections"],
     });
     // console.log(filePaths);
     uploadedFiles = filePaths;
@@ -308,7 +313,7 @@ ipcMain.handle('invokeRegisterUserInfo', async (event, args) => {
 
           if (OK) {
             uploadedFiles = [];
-            mainWindow.webContents.send('onResultRegister', { status: 'OK' });
+            mainWindow.webContents.send("onResultRegister", { status: "OK" });
           }
         }
       }
@@ -316,9 +321,9 @@ ipcMain.handle('invokeRegisterUserInfo', async (event, args) => {
   }
 });
 
-ipcMain.handle('invokeGetUsers', async (event, args) => {
+ipcMain.handle("invokeGetUsers", async (event, args) => {
   console.log(args.term);
-  if (args.term === '') {
+  if (args.term === "") {
     db.all(
       `
     SELECT json_object(
@@ -343,7 +348,7 @@ ipcMain.handle('invokeGetUsers', async (event, args) => {
           console.log(err);
         } else {
           console.log(rows);
-          mainWindow.webContents.send('onGetUsers', { users: rows });
+          mainWindow.webContents.send("onGetUsers", { users: rows });
         }
       }
     );
@@ -381,7 +386,7 @@ ipcMain.handle('invokeGetUsers', async (event, args) => {
         } else {
           console.log(rows);
 
-          mainWindow.webContents.send('get-users', {
+          mainWindow.webContents.send("get-users", {
             users: rows,
           });
         }
@@ -396,7 +401,7 @@ ipcMain.handle('invokeGetUsers', async (event, args) => {
 // or users.address like '%${args.term}%'
 // or users.mobile like '%${args.term}%'
 
-ipcMain.handle('invokeUpdateUser', async (event, args) => {
+ipcMain.handle("invokeUpdateUser", async (event, args) => {
   // args
   const sql = `
     UPDATE users SET full_name = ? ,
@@ -419,7 +424,7 @@ ipcMain.handle('invokeUpdateUser', async (event, args) => {
       return console.error(err.message);
     }
     console.log(`Row(s) updated: ${this.changes}`);
-    mainWindow.webContents.send('onResultUpdateUser', { status: 'OK' });
+    mainWindow.webContents.send("onResultUpdateUser", { status: "OK" });
   });
 });
 
@@ -427,10 +432,10 @@ ipcMain.handle('invokeUpdateUser', async (event, args) => {
  * Add event listeners...
  */
 
-app.on('window-all-closed', () => {
+app.on("window-all-closed", () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
-  if (process.platform !== 'darwin') {
+  if (process.platform !== "darwin") {
     app.quit();
   }
 });
@@ -439,7 +444,7 @@ app
   .whenReady()
   .then(() => {
     createWindow();
-    app.on('activate', () => {
+    app.on("activate", () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();

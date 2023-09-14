@@ -66,7 +66,7 @@ export default function Register() {
       }
     });
 
-    window.electron.ipcRenderer.registerUserInfo({
+    window.electron.ipcRenderer.invokeRegisterUserInfo({
       op_type: 'info',
       info: {
         fullName,
