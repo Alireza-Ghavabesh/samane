@@ -45,7 +45,7 @@ export default function Register() {
 
   function selectImages(e) {
     e.preventDefault();
-    window.electron.ipcRenderer.registerUserInfo({
+    window.electron.ipcRenderer.invokeRegisterUserInfo({
       op_type: 'images',
     });
   }

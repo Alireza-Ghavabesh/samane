@@ -1,7 +1,6 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import { basename } from 'path';
 
 export type Channels = 'ipc-example';
 
@@ -22,20 +21,32 @@ const electronHandler = {
     once(channel: Channels, func: (...args: unknown[]) => void) {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
-    registerUserInfo: (args: any) =>
-      ipcRenderer.invoke('register-user-info', args),
-    onResultRegister: (callback) => ipcRenderer.on('result-register', callback),
-    invokeGetUsers: (args: any) => ipcRenderer.invoke('invoke-get-users', args),
-    onGetUsers: (callback) => ipcRenderer.once('get-users', callback),
-    removeAllListenersGetUsers: () =>
-      ipcRenderer.removeAllListeners('get-users'),
+    // register user
+    invokeRegisterUserInfo: (args: any) =>
+      ipcRenderer.invoke('invokeRegisterUserInfo', args),
+    onResultRegister: (callback) =>
+      ipcRenderer.on('onResultRegister', callback),
     removeAllListenersResultRegister: () =>
-      ipcRenderer.removeAllListeners('result-register'),
-    invokeUpdateUser: (args: any) => ipcRenderer.invoke('update-user', args),
-    onResultNewImages: (callback) =>
-      ipcRenderer.on('new-upload-images', callback),
-    removeAllListenersResultNewImages: () =>
-      ipcRenderer.removeAllListeners('new-upload-images'),
+      ipcRenderer.removeAllListeners('onResultRegister'),
+    // get users
+    invokeGetUsers: (args: any) => ipcRenderer.invoke('invokeGetUsers', args),
+    onGetUsers: (callback) => ipcRenderer.once('onGetUsers', callback),
+    removeAllListenersGetUsers: () =>
+      ipcRenderer.removeAllListeners('onGetUsers'),
+    // update user info
+    invokeUpdateUser: (args: any) =>
+      ipcRenderer.invoke('invokeUpdateUser', args),
+    onResultUpdateUser: (callback) =>
+      ipcRenderer.on('onResultUpdateUser', callback),
+    removeAllListenersResultUpdateUser: () =>
+      ipcRenderer.removeAllListeners('onResultUpdateUser'),
+    // add new user images
+    invokeNewUserImages: (args: any) =>
+      ipcRenderer.invoke('invokeNewUserImages', args),
+    onResultNewUserImages: (callback) =>
+      ipcRenderer.on('onResultNewUserImages', callback),
+    removeAllListenersResultNewUserImages: () =>
+      ipcRenderer.removeAllListeners('onResultNewUserImages'),
   },
 };
 

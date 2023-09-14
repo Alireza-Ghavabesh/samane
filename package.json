@@ -12,25 +12,25 @@
     "hot",
     "reload"
   ],
-  "homepage": "https://github.com/electron-react-boilerplate/electron-react-boilerplate#readme",
+  "homepage": "https://github.com/Alireza-Ghavabesh/basij/basij#readme",
   "bugs": {
-    "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues"
+    "url": "https://github.com/Alireza-Ghavabesh/basij/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electron-react-boilerplate/electron-react-boilerplate.git"
+    "url": "git+https://github.com/Alireza-Ghavabesh/basij.git"
   },
   "license": "MIT",
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://electron-react-boilerplate.js.org"
+    "name": "alireza ghavabesh",
+    "email": "mohandesghavabesh@gmail.com",
+    "url": "https://alireza-ghavabesh.github.io"
   },
   "contributors": [
     {
-      "name": "Amila Welihinda",
-      "email": "amilajack@gmail.com",
-      "url": "https://github.com/amilajack"
+      "name": "alireza ghavabesh",
+      "email": "mohandesghavabesh@gmail.com",
+      "url": "https://alireza-ghavabesh.github.io"
     }
   ],
   "main": "./src/main/main.ts",
@@ -215,7 +215,8 @@
         "target": "default",
         "arch": [
           "arm64",
-          "x64"
+          "x64",
+          "ia32"
         ]
       },
       "type": "distribution",
@@ -243,6 +244,20 @@
         "nsis"
       ]
     },
+    "nsis": {
+      "allowToChangeInstallationDirectory": true,
+      "oneClick": false
+    },
+    "protocols": [
+      {
+        "name": "atom",
+        "role": "Editor",
+        "schemes": [
+          "irc",
+          "ircs"
+        ]
+      }
+    ],
     "linux": {
       "target": [
         "AppImage"
@@ -259,7 +274,7 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "electron-react-boilerplate",
+      "owner": "alireza ghavabesh",
       "repo": "electron-react-boilerplate"
     }
   },

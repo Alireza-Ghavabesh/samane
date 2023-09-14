@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import Tr from './Tr';
 import moreImage from './../../../assets/more-image.png';
 
+function getFilename(fullPath: string) {
+  return fullPath.replace(/^.*[\\\/]/, '');
+}
+
 export default function Search() {
   const [isShown, setIsShown] = useState(false);
   // for users
@@ -20,7 +24,7 @@ export default function Search() {
         const parsedUser = JSON.parse(user.record);
         parsedUser.images.forEach((image) => {
           const img = {
-            src: `atom://${image.original}`,
+            src: `atom:///${image.original}`,
           };
           userImages.push(img);
         });

@@ -10,20 +10,28 @@
  */
 import path, { basename } from 'path';
 import fs from 'fs';
-import { app, BrowserWindow, shell, ipcMain, dialog, protocol } from 'electron';
-import { autoUpdater } from 'electron-updater';
-import log from 'electron-log';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  dialog,
+  protocol,
+  net,
+} from 'electron';
+// import { autoUpdater } from 'electron-updater';
+// import log from 'electron-log';
 // import crypto from 'crypto';
-import MenuBuilder from './menu';
+// import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
-class AppUpdater {
-  constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
-  }
-}
+// class AppUpdater {
+//   constructor() {
+//     log.transports.file.level = 'info';
+//     autoUpdater.logger = log;
+//     autoUpdater.checkForUpdatesAndNotify();
+//   }
+// }
 
 function copyFileFromDatabase(FILEPATH, DEST) {
   const src = FILEPATH;
@@ -112,11 +120,9 @@ const createWindow = async () => {
 
   // eslint-disable-next-line promise/catch-or-return
   app.whenReady().then(() => {
-    protocol.registerFileProtocol('atom', (request, callback) => {
-      console.log(request.url);
-      const url = request.url.substr(7);
-      callback({ path: url });
-    });
+    protocol.handle('atom', (request) =>
+      net.fetch(`file:///${request.url.slice('atom:///'.length)}`)
+    );
   });
 
   // mainWindow.setResizable(false);
@@ -179,36 +185,29 @@ db.run(`CREATE TABLE IF NOT EXISTS images (
         ON UPDATE NO ACTION
 )`);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-let uploadedFiles: string[];
-// eslint-disable-next-line consistent-return
-ipcMain.handle('register-user-info', async (event, args) => {
-  if (args.op_type === 'images') {
-    const { canceled, filePaths } = await dialog.showOpenDialog({
-      properties: ['multiSelections'],
+ipcMain.handle('invokeNewUserImages', async (event, args) => {
+  const picturesPath = getPicturesPath();
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ['multiSelections'],
+  });
+  if (canceled) {
+    console.log(canceled);
+    mainWindow.webContents.send('onResultNewUserImages', {
+      status: 'canceled',
     });
-    // console.log(filePaths);
-    uploadedFiles = filePaths;
-    if (!canceled) {
-      return filePaths[0];
-    }
-  } else if (args.op_type === 'new-images') {
-    const picturesPath = getPicturesPath();
-    const { canceled, filePaths } = await dialog.showOpenDialog({
-      properties: ['multiSelections'],
-    });
+  } else {
     // do save
-    uploadedFiles = filePaths;
-    if (uploadedFiles.length > 0) {
-      let OK = true;
-      uploadedFiles.forEach((file_path) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    let OK = true;
+    if (filePaths.length > 0) {
+      filePaths.forEach((file_path) => {
         // copy file in images folder
         copyFileFromDatabase(file_path, `pictures/${args.nationalCode}`);
         db.run(
           `
-        INSERT INTO images (user_id, original, thumbnail, full_path_src)
-        VALUES (?, ?, ?, ?)
-        `,
+            INSERT INTO images (user_id, original, thumbnail, full_path_src)
+            VALUES (?, ?, ?, ?)
+            `,
           // eslint-disable-next-line camelcase
           [
             args.user_id,
@@ -219,17 +218,32 @@ ipcMain.handle('register-user-info', async (event, args) => {
           ],
           function (err) {
             if (err) {
+              console.log(err);
               OK = false;
-            } else {
-              OK = true;
             }
           }
         );
       });
     }
+    if (OK) {
+      mainWindow.webContents.send('onResultNewUserImages', {
+        status: 'OK',
+        num: filePaths.length,
+      });
+    }
+  }
+});
 
-    // after all makes it empty
-    uploadedFiles = [];
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+let uploadedFiles: string[];
+// eslint-disable-next-line consistent-return
+ipcMain.handle('invokeRegisterUserInfo', async (event, args) => {
+  if (args.op_type === 'images') {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ['multiSelections'],
+    });
+    // console.log(filePaths);
+    uploadedFiles = filePaths;
     if (!canceled) {
       return filePaths[0];
     }
@@ -294,7 +308,7 @@ ipcMain.handle('register-user-info', async (event, args) => {
 
           if (OK) {
             uploadedFiles = [];
-            mainWindow.webContents.send('result-register', { status: 'OK' });
+            mainWindow.webContents.send('onResultRegister', { status: 'OK' });
           }
         }
       }
@@ -302,7 +316,7 @@ ipcMain.handle('register-user-info', async (event, args) => {
   }
 });
 
-ipcMain.handle('invoke-get-users', async (event, args) => {
+ipcMain.handle('invokeGetUsers', async (event, args) => {
   console.log(args.term);
   if (args.term === '') {
     db.all(
@@ -329,7 +343,7 @@ ipcMain.handle('invoke-get-users', async (event, args) => {
           console.log(err);
         } else {
           console.log(rows);
-          mainWindow.webContents.send('get-users', { users: rows });
+          mainWindow.webContents.send('onGetUsers', { users: rows });
         }
       }
     );
@@ -382,7 +396,7 @@ ipcMain.handle('invoke-get-users', async (event, args) => {
 // or users.address like '%${args.term}%'
 // or users.mobile like '%${args.term}%'
 
-ipcMain.handle('update-user', async (event, args) => {
+ipcMain.handle('invokeUpdateUser', async (event, args) => {
   // args
   const sql = `
     UPDATE users SET full_name = ? ,
@@ -405,6 +419,7 @@ ipcMain.handle('update-user', async (event, args) => {
       return console.error(err.message);
     }
     console.log(`Row(s) updated: ${this.changes}`);
+    mainWindow.webContents.send('onResultUpdateUser', { status: 'OK' });
   });
 });
 

@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import Gallery from './gallrey';
 import iconSave from '../../../assets/Save.512.png';
 import { toast } from 'react-toastify';
@@ -8,7 +8,6 @@ import IRANSansWeb from './../../../assets/fonts/IRANSansWeb.woff2';
 
 export default function Tr(props) {
   const TrRef = useRef(null);
-  const [newImagesAdded, setNewImagesAdded] = useState(false);
   const notify = () => {
     let user_id = TrRef.current.id;
     let fullName = TrRef.current.childNodes[0].textContent;
@@ -24,23 +23,52 @@ export default function Tr(props) {
       address: address,
       mobile: mobile,
     };
-    window.electron.ipcRenderer.invokeUpdateUser(newInfo);
-    console.log(newInfo);
-    toast.success('تغییرات ذخیره شد', {
-      position: toast.POSITION.TOP_RIGHT,
-      autoClose: 1000,
-      style: {
-        fontFamily: 'IRANSansWeb',
-      },
+
+    window.electron.ipcRenderer.removeAllListenersResultUpdateUser();
+    window.electron.ipcRenderer.onResultUpdateUser((event, value) => {
+      if (value.status === 'OK') {
+        toast.success('تغییرات ذخیره شد', {
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 1000,
+          style: {
+            fontFamily: 'IRANSansWeb',
+          },
+        });
+      }
     });
+    window.electron.ipcRenderer.invokeUpdateUser(newInfo);
   };
 
   const addMoreImages = () => {
     let user_id = TrRef.current.id;
     let nationalCode = TrRef.current.childNodes[1].textContent;
 
-    window.electron.ipcRenderer.registerUserInfo({
-      op_type: 'new-images',
+    window.electron.ipcRenderer.removeAllListenersResultNewUserImages();
+    window.electron.ipcRenderer.onResultNewUserImages((event, value) => {
+      console.log(event, value);
+      if (value.status === 'canceled') {
+        console.log('canceled');
+      } else {
+        if (value.num > 1) {
+          toast.success('عکس ها ذخیره شد', {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 1000,
+            style: {
+              fontFamily: 'IRANSansWeb',
+            },
+          });
+        } else {
+          toast.success('عکس  ذخیره شد', {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 1000,
+            style: {
+              fontFamily: 'IRANSansWeb',
+            },
+          });
+        }
+      }
+    });
+    window.electron.ipcRenderer.invokeNewUserImages({
       user_id: user_id,
       nationalCode: nationalCode,
     });
