@@ -188,6 +188,7 @@ db.run(`CREATE TABLE IF NOT EXISTS images (
       REFERENCES users (id)
         ON DELETE CASCADE
         ON UPDATE NO ACTION
+  UNIQUE(full_path_src, thumbnail, original)
 )`);
 
 ipcMain.handle("invokeNewUserImages", async (event, args) => {
@@ -386,7 +387,7 @@ ipcMain.handle("invokeGetUsers", async (event, args) => {
         } else {
           console.log(rows);
 
-          mainWindow.webContents.send("get-users", {
+          mainWindow.webContents.send("onGetUsers", {
             users: rows,
           });
         }

@@ -17,6 +17,7 @@ export default function Search() {
     window.electron.ipcRenderer.removeAllListenersGetUsers();
     window.electron.ipcRenderer.onGetUsers((event, value) => {
       let tempUsers: any = [];
+      console.log(value.users);
       value.users.forEach((user) => {
         const userImages: { original: string; thumbnail: string }[] = [];
         const parsedUser = JSON.parse(user.record);

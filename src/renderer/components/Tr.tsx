@@ -1,10 +1,10 @@
 /* eslint-disable */
 
-import { useRef } from 'react';
-import Gallery from './gallrey';
-import iconSave from '../../../assets/Save.512.png';
-import { toast } from 'react-toastify';
-import IRANSansWeb from './../../../assets/fonts/IRANSansWeb.woff2';
+import { useRef } from "react";
+import Gallery from "./gallrey";
+import iconSave from "../../../assets/Save.512.png";
+import { toast } from "react-toastify";
+import IRANSansWeb from "./../../../assets/fonts/IRANSansWeb.woff2";
 
 export default function Tr(props) {
   const TrRef = useRef(null);
@@ -26,12 +26,12 @@ export default function Tr(props) {
 
     window.electron.ipcRenderer.removeAllListenersResultUpdateUser();
     window.electron.ipcRenderer.onResultUpdateUser((event, value) => {
-      if (value.status === 'OK') {
-        toast.success('تغییرات ذخیره شد', {
+      if (value.status === "OK") {
+        toast.success("تغییرات ذخیره شد", {
           position: toast.POSITION.TOP_RIGHT,
           autoClose: 1000,
           style: {
-            fontFamily: 'IRANSansWeb',
+            fontFamily: "IRANSansWeb",
           },
         });
       }
@@ -46,23 +46,23 @@ export default function Tr(props) {
     window.electron.ipcRenderer.removeAllListenersResultNewUserImages();
     window.electron.ipcRenderer.onResultNewUserImages((event, value) => {
       console.log(event, value);
-      if (value.status === 'canceled') {
-        console.log('canceled');
+      if (value.status === "canceled") {
+        console.log("canceled");
       } else {
         if (value.num > 1) {
-          toast.success('عکس ها ذخیره شد', {
+          toast.success("عکس ها ذخیره شد", {
             position: toast.POSITION.TOP_RIGHT,
             autoClose: 1000,
             style: {
-              fontFamily: 'IRANSansWeb',
+              fontFamily: "IRANSansWeb",
             },
           });
         } else {
-          toast.success('عکس  ذخیره شد', {
+          toast.success("عکس  ذخیره شد", {
             position: toast.POSITION.TOP_RIGHT,
             autoClose: 1000,
             style: {
-              fontFamily: 'IRANSansWeb',
+              fontFamily: "IRANSansWeb",
             },
           });
         }
@@ -72,6 +72,10 @@ export default function Tr(props) {
       user_id: user_id,
       nationalCode: nationalCode,
     });
+  };
+
+  const onImageLoadCallback = (e) => {
+    console.log(e);
   };
 
   return (
@@ -97,7 +101,11 @@ export default function Tr(props) {
         {props.user.mobile}
       </td>
       <td className="bg-orange-400 border-4 hover:bg-orange-600 ">
-        <Gallery images={props.user.images} name="تصاویر" className="" />
+        <Gallery
+          images={props.user.images}
+          onImageLoad={onImageLoadCallback}
+          name="تصاویر"
+        />
       </td>
       <td className="m-auto w-12 hover:bg-gray-600" onClick={notify}>
         <img src={iconSave} alt="" className="cursor-pointer" />
