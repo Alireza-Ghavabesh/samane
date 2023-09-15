@@ -24,8 +24,10 @@ export default function Search() {
         parsedUser.images.forEach((image) => {
           const img = {
             src: require(`./../../../pictures/${
-              parsedUser.national_code
+              image.national_code
             }/${getFilename(image.original)}`),
+            user_id: parsedUser.user_id,
+            image_id: image.image_id,
           };
           userImages.push(img);
         });
@@ -82,7 +84,7 @@ export default function Search() {
               <th className="border-4 p-2">شماره همراه</th>
               <th className="border-4 p-2">تصاویر</th>
               <th className="border-4 p-2">ویرایش</th>
-              <th className="border-4 p-2 flex justify-center">
+              <th className="p-2 flex justify-center">
                 <img src={moreImage} width={30} alt="" />
               </th>
             </tr>

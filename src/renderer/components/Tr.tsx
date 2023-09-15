@@ -74,10 +74,6 @@ export default function Tr(props) {
     });
   };
 
-  const onImageLoadCallback = (e) => {
-    console.log(e);
-  };
-
   return (
     <tr
       key={props.user.user_id}
@@ -100,18 +96,14 @@ export default function Tr(props) {
       <td className="border-4 p-2 outline-none" contentEditable>
         {props.user.mobile}
       </td>
-      <td className="bg-orange-400 border-4 hover:bg-orange-600 ">
-        <Gallery
-          images={props.user.images}
-          onImageLoad={onImageLoadCallback}
-          name="تصاویر"
-        />
+      <td className="bg-orange-400 border-4 hover:bg-orange-600">
+        <Gallery images={props.user.images} name="تصاویر" />
       </td>
-      <td className="m-auto w-12 hover:bg-gray-600" onClick={notify}>
-        <img src={iconSave} alt="" className="cursor-pointer" />
+      <td className="hover:bg-gray-300 cursor-pointer" onClick={notify}>
+        ذخیره
       </td>
       <td
-        className="border-4 p-2 outline-none text-4xl hover:transition  hover:bg-slate-700 cursor-pointer "
+        className="flex justify-center items-center border-r-4 outline-none text-4xl hover:transition hover:bg-gray-300  cursor-pointer"
         onClick={addMoreImages}
       >
         +

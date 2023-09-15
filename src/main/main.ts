@@ -180,9 +180,10 @@ db.run(`CREATE TABLE IF NOT EXISTS users (
 db.run(`CREATE TABLE IF NOT EXISTS images (
   image_id INTEGER,
   user_id INTEGER,
-  full_path_src TEXT NOT NULL,
-  original NOT NULL,
-  thumbnail NOT NULL,
+  full_path_src TEXT,
+  original TEXT,
+  thumbnail TEXT,
+  national_code TEXT,
   PRIMARY KEY (image_id),
   FOREIGN KEY (user_id)
       REFERENCES users (id)
@@ -211,8 +212,8 @@ ipcMain.handle("invokeNewUserImages", async (event, args) => {
         copyFileFromDatabase(file_path, `pictures/${args.nationalCode}`);
         db.run(
           `
-            INSERT INTO images (user_id, original, thumbnail, full_path_src)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO images (user_id, original, thumbnail, full_path_src, national_code)
+            VALUES (?, ?, ?, ?, ?)
             `,
           // eslint-disable-next-line camelcase
           [
@@ -221,6 +222,7 @@ ipcMain.handle("invokeNewUserImages", async (event, args) => {
             `${picturesPath}\\${args.nationalCode}\\${basename(file_path)}`,
             // eslint-disable-next-line camelcase
             file_path,
+            args.nationalCode,
           ],
           function (err) {
             if (err) {
@@ -286,8 +288,8 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
               );
               db.run(
                 `
-              INSERT INTO images (user_id, original, thumbnail, full_path_src)
-              VALUES (?, ?, ?, ?)
+              INSERT INTO images (user_id, original, thumbnail, full_path_src, national_code)
+              VALUES (?, ?, ?, ?, ?)
               `,
                 // eslint-disable-next-line camelcase
                 [
@@ -300,6 +302,7 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
                   )}`,
                   // eslint-disable-next-line camelcase
                   file_path,
+                  args.info.nationalCode,
                 ],
                 function (err) {
                   if (err) {
@@ -338,7 +341,8 @@ ipcMain.handle("invokeGetUsers", async (event, args) => {
       , (SELECT json_group_array(json_object('image_id', imgs.image_id,
       'full_path_src', imgs.full_path_src,
       'original', imgs.original,
-      'thumbnail', imgs.thumbnail
+      'thumbnail', imgs.thumbnail,
+      'national_code', imgs.national_code
       )) FROM images AS imgs
         WHERE imgs.user_id = usrs.user_id)) AS record
       FROM users AS usrs;
@@ -426,6 +430,22 @@ ipcMain.handle("invokeUpdateUser", async (event, args) => {
     }
     console.log(`Row(s) updated: ${this.changes}`);
     mainWindow.webContents.send("onResultUpdateUser", { status: "OK" });
+  });
+});
+
+ipcMain.handle("invokeDeleteUserImage", async (event, args) => {
+  // args
+  const sql = `
+    DELETE FROM images
+    WHERE user_id = ? and image_id = ?
+  `;
+  const data = [args.user_id, args.image_id];
+  db.run(sql, data, function (err) {
+    if (err) {
+      return console.error(err.message);
+    }
+    console.log(`Row(s) deleted: ${this.changes}`);
+    mainWindow.webContents.send("onResultDeleteUserImage", { status: "OK" });
   });
 });
 

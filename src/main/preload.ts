@@ -1,8 +1,8 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
-import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 
-export type Channels = 'ipc-example';
+export type Channels = "ipc-example";
 
 const electronHandler = {
   ipcRenderer: {
@@ -23,33 +23,40 @@ const electronHandler = {
     },
     // register user
     invokeRegisterUserInfo: (args: any) =>
-      ipcRenderer.invoke('invokeRegisterUserInfo', args),
+      ipcRenderer.invoke("invokeRegisterUserInfo", args),
     onResultRegister: (callback) =>
-      ipcRenderer.on('onResultRegister', callback),
+      ipcRenderer.on("onResultRegister", callback),
     removeAllListenersResultRegister: () =>
-      ipcRenderer.removeAllListeners('onResultRegister'),
+      ipcRenderer.removeAllListeners("onResultRegister"),
     // get users
-    invokeGetUsers: (args: any) => ipcRenderer.invoke('invokeGetUsers', args),
-    onGetUsers: (callback) => ipcRenderer.once('onGetUsers', callback),
+    invokeGetUsers: (args: any) => ipcRenderer.invoke("invokeGetUsers", args),
+    onGetUsers: (callback) => ipcRenderer.once("onGetUsers", callback),
     removeAllListenersGetUsers: () =>
-      ipcRenderer.removeAllListeners('onGetUsers'),
+      ipcRenderer.removeAllListeners("onGetUsers"),
     // update user info
     invokeUpdateUser: (args: any) =>
-      ipcRenderer.invoke('invokeUpdateUser', args),
+      ipcRenderer.invoke("invokeUpdateUser", args),
     onResultUpdateUser: (callback) =>
-      ipcRenderer.on('onResultUpdateUser', callback),
+      ipcRenderer.on("onResultUpdateUser", callback),
     removeAllListenersResultUpdateUser: () =>
-      ipcRenderer.removeAllListeners('onResultUpdateUser'),
+      ipcRenderer.removeAllListeners("onResultUpdateUser"),
     // add new user images
     invokeNewUserImages: (args: any) =>
-      ipcRenderer.invoke('invokeNewUserImages', args),
+      ipcRenderer.invoke("invokeNewUserImages", args),
     onResultNewUserImages: (callback) =>
-      ipcRenderer.on('onResultNewUserImages', callback),
+      ipcRenderer.on("onResultNewUserImages", callback),
     removeAllListenersResultNewUserImages: () =>
-      ipcRenderer.removeAllListeners('onResultNewUserImages'),
+      ipcRenderer.removeAllListeners("onResultNewUserImages"),
+    // delete user image
+    invokeDeleteUserImage: (args: any) =>
+      ipcRenderer.invoke("invokeDeleteUserImage", args),
+    onResultDeleteUserImage: (callback) =>
+      ipcRenderer.on("onResultDeleteUserImage", callback),
+    removeAllListenersResultDeleteUserImage: () =>
+      ipcRenderer.removeAllListeners("onResultDeleteUserImage"),
   },
 };
 
-contextBridge.exposeInMainWorld('electron', electronHandler);
+contextBridge.exposeInMainWorld("electron", electronHandler);
 
 export type ElectronHandler = typeof electronHandler;
