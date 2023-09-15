@@ -12,23 +12,21 @@ export default function Gallery(props) {
   const [open, setOpen] = useState(false);
 
   const deleteUserImage = () => {
-    const user_id = ref.current.getLightboxState().currentSlide.user_id;
-    const image_id = ref.current.getLightboxState().currentSlide.image_id;
-    window.electron.ipcRenderer.removeAllListenersResultDeleteUserImage();
-    window.electron.ipcRenderer.onResultDeleteUserImage((event, value) => {
-      if (value.status === "OK") {
-        console.log(`deleted: user_id=${user_id} , image_id=${image_id}`);
+    if (ref.current.getLightboxState().slides.length > 0) {
+      const user_id = ref.current.getLightboxState().currentSlide.user_id;
+      const image_id = ref.current.getLightboxState().currentSlide.image_id;
+      window.electron.ipcRenderer.removeAllListenersResultDeleteUserImage();
+      window.electron.ipcRenderer.onResultDeleteUserImage((event, value) => {
+        if (value.status === "OK") {
+          console.log(`deleted: user_id=${user_id} , image_id=${image_id}`);
+        }
+      });
 
-        ref.current
-          .getLightboxState()
-          .slides.splice(ref.current.getLightboxState().slides.currentIndex, 1);
-      }
-    });
-
-    window.electron.ipcRenderer.invokeDeleteUserImage({
-      user_id: user_id,
-      image_id: image_id,
-    });
+      window.electron.ipcRenderer.invokeDeleteUserImage({
+        user_id: user_id,
+        image_id: image_id,
+      });
+    }
   };
 
   return (
