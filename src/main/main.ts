@@ -10,15 +10,7 @@
  */
 import path, { basename } from "path";
 import fs from "fs";
-import {
-  app,
-  BrowserWindow,
-  shell,
-  ipcMain,
-  dialog,
-  protocol,
-  net,
-} from "electron";
+import { app, BrowserWindow, shell, ipcMain, dialog } from "electron";
 // import { autoUpdater } from 'electron-updater';
 // import log from 'electron-log';
 // import crypto from 'crypto';
@@ -42,20 +34,24 @@ function createPicturesDirIfNotExist() {
 
 createPicturesDirIfNotExist();
 
-function copyFileFromDatabase(FILEPATH, DEST) {
-  const src = FILEPATH;
-  // fs.mkdir(national_code);
-  const national_code = DEST;
-  const dest = `${national_code}/${basename(src)}`;
-  if (!fs.existsSync(`${national_code}`)) {
-    fs.mkdirSync(`${national_code}`, { recursive: true });
-  }
+async function copyFileFromDatabase(FILEPATH: string, DEST: string) {
+  // eslint-disable-next-line compat/compat, func-names
+  const promise = new Promise(function (resolve, reject) {
+    const src = FILEPATH;
+    const dest = `${DEST}/${basename(src)}`;
+    if (!fs.existsSync(`${DEST}`)) {
+      fs.mkdirSync(`${DEST}`, { recursive: true });
+    }
 
-  // eslint-disable-next-line camelcase
-  fs.copyFile(src, dest, (err) => {
-    if (err) throw err;
-    console.log("op successfull");
+    fs.copyFile(src, dest, (err) => {
+      if (err) {
+        reject(new Error(`error: ${err}`)); // ignored
+      }
+      resolve("done");
+    });
   });
+
+  return promise;
 }
 
 function getPicturesPath() {
@@ -145,7 +141,7 @@ const createWindow = async () => {
   });
 
   mainWindow.on("closed", () => {
-    mainWindow = null;
+    mainWindow.destroy();
   });
 
   // eslint-disable-next-line consistent-return, @typescript-eslint/no-unused-vars
@@ -163,12 +159,11 @@ const createWindow = async () => {
   // eslint-disable-next-line
   // new AppUpdater();
 };
-// const uuid = crypto.randomUUID();
+
 const sqlite3 = require("sqlite3").verbose();
 
 const db = new sqlite3.Database("basij.db");
 
-// const uuid = crypto.randomUUID();
 db.run(`CREATE TABLE IF NOT EXISTS users (
   user_id INTEGER PRIMARY KEY,
   full_name TEXT,
@@ -204,40 +199,57 @@ ipcMain.handle("invokeNewUserImages", async (event, args) => {
     });
   } else {
     // do save
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    let OK = true;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-lonely-if
     if (filePaths.length > 0) {
-      filePaths.forEach((file_path) => {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const filePath of filePaths) {
         // copy file in images folder
-        copyFileFromDatabase(file_path, `pictures/${args.nationalCode}`);
-        db.run(
-          `
-            INSERT INTO images (user_id, original, thumbnail, full_path_src, national_code)
-            VALUES (?, ?, ?, ?, ?)
-            `,
-          // eslint-disable-next-line camelcase
-          [
-            args.user_id,
-            `${picturesPath}\\${args.nationalCode}\\${basename(file_path)}`,
-            `${picturesPath}\\${args.nationalCode}\\${basename(file_path)}`,
-            // eslint-disable-next-line camelcase
-            file_path,
-            args.nationalCode,
-          ],
-          function (err) {
-            if (err) {
-              console.log(err);
-              OK = false;
-            }
-          }
-        );
-      });
-    }
-    if (OK) {
-      mainWindow.webContents.send("onResultNewUserImages", {
-        status: "OK",
-        num: filePaths.length,
-      });
+        copyFileFromDatabase(filePath, `pictures/${args.nationalCode}`)
+          // eslint-disable-next-line consistent-return, no-loop-func
+          .then(() => {
+            db.run(
+              `
+              INSERT INTO images (user_id, original, thumbnail, full_path_src, national_code)
+              VALUES (?, ?, ?, ?, ?)
+              `,
+              // eslint-disable-next-line camelcase
+              [
+                args.user_id,
+                `${picturesPath}\\${args.nationalCode}\\${basename(filePath)}`,
+                `${picturesPath}\\${args.nationalCode}\\${basename(filePath)}`,
+                // eslint-disable-next-line camelcase
+                filePath,
+                args.nationalCode,
+              ],
+              function (err: any) {
+                if (err) {
+                  mainWindow.webContents.send("onResultNewUserImages", {
+                    status: "ErrorInsert",
+                    error: JSON.stringify(err),
+                  });
+                } else {
+                  mainWindow.webContents.send("onResultNewUserImages", {
+                    status: "OkInsert",
+                    num: filePaths.length,
+                    newImagePath: `./../../../pictures/${
+                      args.nationalCode
+                    }/${basename(filePath)}`,
+                    user_id: args.user_id,
+                    image_id: this.lastID,
+                  });
+                }
+              }
+            );
+          })
+          // eslint-disable-next-line no-loop-func
+          .catch(() => {
+            // send message NO
+            mainWindow.webContents.send("onResultNewUserImages", {
+              status: "ErrorCopy",
+              num: filePaths.length,
+            });
+          });
+      }
     }
   }
 });
@@ -280,10 +292,10 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
             uploadedFiles = [];
           }
           if (uploadedFiles.length > 0) {
-            uploadedFiles.forEach((file_path) => {
+            uploadedFiles.forEach((filePath) => {
               // copy file in images folder
               copyFileFromDatabase(
-                file_path,
+                filePath,
                 `pictures/${args.info.nationalCode}`
               );
               db.run(
@@ -295,17 +307,17 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
                 [
                   this.lastID,
                   `${picturesPath}\\${args.info.nationalCode}\\${basename(
-                    file_path
+                    filePath
                   )}`,
                   `${picturesPath}\\${args.info.nationalCode}\\${basename(
-                    file_path
+                    filePath
                   )}`,
                   // eslint-disable-next-line camelcase
-                  file_path,
+                  filePath,
                   args.info.nationalCode,
                 ],
-                function (err) {
-                  if (err) {
+                function (errr: any) {
+                  if (errr) {
                     OK = false;
                   }
                 }
@@ -348,7 +360,7 @@ ipcMain.handle("invokeGetUsers", async (event, args) => {
       FROM users AS usrs;
     `,
       [],
-      (err, rows) => {
+      (err: any, rows: any) => {
         if (err) {
           console.log(err);
         } else {
@@ -371,7 +383,8 @@ ipcMain.handle("invokeGetUsers", async (event, args) => {
       , (SELECT json_group_array(json_object('image_id', imgs.image_id,
       'full_path_src', imgs.full_path_src,
       'original', imgs.original,
-      'thumbnail', imgs.thumbnail
+      'thumbnail', imgs.thumbnail,
+      'national_code', imgs.national_code
       ))
         FROM images AS imgs
         WHERE imgs.user_id = usrs.user_id)) AS record
@@ -424,7 +437,7 @@ ipcMain.handle("invokeUpdateUser", async (event, args) => {
     args.mobile,
     args.user_id,
   ];
-  db.run(sql, data, function (err) {
+  db.run(sql, data, function (err: any) {
     if (err) {
       return console.error(err.message);
     }
@@ -440,7 +453,7 @@ ipcMain.handle("invokeDeleteUserImage", async (event, args) => {
     WHERE user_id = ? and image_id = ?
   `;
   const data = [args.user_id, args.image_id];
-  db.run(sql, data, function (err) {
+  db.run(sql, data, function (err: any) {
     if (err) {
       return console.error(err.message);
     }

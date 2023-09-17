@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
@@ -8,6 +8,7 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import iconDelete from "../../../assets/delete-orange.png";
 
 export default function Gallery(props) {
+  const [userImages, setUserImages] = useState(props.images);
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
 
@@ -19,6 +20,15 @@ export default function Gallery(props) {
       window.electron.ipcRenderer.onResultDeleteUserImage((event, value) => {
         if (value.status === "OK") {
           console.log(`deleted: user_id=${user_id} , image_id=${image_id}`);
+          setUserImages(() =>
+            userImages.filter((image) => {
+              return image.image_id !== image_id;
+            })
+          );
+          // console.log(userImages);
+          // setUserImages(() =>
+          //   userImages.splice(ref.current.getLightboxState().currentIndex)
+          // );
         }
       });
 
@@ -28,6 +38,11 @@ export default function Gallery(props) {
       });
     }
   };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    setUserImages(() => userImages);
+  });
 
   return (
     <>
@@ -53,7 +68,7 @@ export default function Gallery(props) {
         plugins={[Thumbnails, Counter]}
         open={open}
         close={() => setOpen(false)}
-        slides={props.images}
+        slides={userImages}
         controller={{ ref }}
       />
     </>

@@ -19,9 +19,15 @@ export default function Search() {
       let tempUsers: any = [];
       console.log(value.users);
       value.users.forEach((user) => {
-        const userImages: { original: string; thumbnail: string }[] = [];
+        const userImages = [];
         const parsedUser = JSON.parse(user.record);
+
         parsedUser.images.forEach((image) => {
+          console.log(
+            `./../../../pictures/${image.national_code}/${getFilename(
+              image.original
+            )}`
+          );
           const img = {
             src: require(`./../../../pictures/${
               image.national_code

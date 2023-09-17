@@ -1,12 +1,12 @@
 /* eslint-disable */
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Gallery from "./gallrey";
-import iconSave from "../../../assets/Save.512.png";
 import { toast } from "react-toastify";
 import IRANSansWeb from "./../../../assets/fonts/IRANSansWeb.woff2";
 
 export default function Tr(props) {
+  const [userImages, setUserImages] = useState(props.user.images);
   const TrRef = useRef(null);
   const notify = () => {
     let user_id = TrRef.current.id;
@@ -48,17 +48,9 @@ export default function Tr(props) {
       console.log(event, value);
       if (value.status === "canceled") {
         console.log("canceled");
-      } else {
-        if (value.num > 1) {
-          toast.success("عکس ها ذخیره شد", {
-            position: toast.POSITION.TOP_RIGHT,
-            autoClose: 1000,
-            style: {
-              fontFamily: "IRANSansWeb",
-            },
-          });
-        } else {
-          toast.success("عکس  ذخیره شد", {
+      } else if (value.status === "ErrorInsert") {
+        if (JSON.parse(value.error).code === "SQLITE_CONSTRAINT") {
+          toast.error("عکس تکراری ذخیره نشد", {
             position: toast.POSITION.TOP_RIGHT,
             autoClose: 1000,
             style: {
@@ -66,6 +58,32 @@ export default function Tr(props) {
             },
           });
         }
+      } else if (value.status === "OkInsert") {
+        console.log(value.newImagePath);
+        console.log(value.user_id);
+        console.log(value.image_id);
+        // setUserImages(() =>
+        //   userImages.push({
+        //     src: require(`${value.newImagePath}`),
+        //     user_id: value.user_id,
+        //     image_id: value.image_id,
+        //   })
+        // );
+        toast.success("عکس ذخیره شد", {
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 1000,
+          style: {
+            fontFamily: "IRANSansWeb",
+          },
+        });
+      } else if (value.status === "ErrorCopy") {
+        toast.error("مشکلی در کپی فایل ها پیش آمده", {
+          position: toast.POSITION.TOP_RIGHT,
+          autoClose: 1000,
+          style: {
+            fontFamily: "IRANSansWeb",
+          },
+        });
       }
     });
     window.electron.ipcRenderer.invokeNewUserImages({
@@ -73,6 +91,10 @@ export default function Tr(props) {
       nationalCode: nationalCode,
     });
   };
+
+  useEffect(() => {
+    setUserImages(() => userImages);
+  }, [userImages]);
 
   return (
     <tr
@@ -97,7 +119,7 @@ export default function Tr(props) {
         {props.user.mobile}
       </td>
       <td className="bg-orange-400 border-4 hover:bg-orange-600">
-        <Gallery images={props.user.images} name="تصاویر" />
+        <Gallery images={userImages} name="تصاویر" />
       </td>
       <td className="hover:bg-gray-300 cursor-pointer" onClick={notify}>
         ذخیره
