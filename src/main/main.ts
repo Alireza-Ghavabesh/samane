@@ -191,6 +191,7 @@ ipcMain.handle("invokeNewUserImages", async (event, args) => {
   const picturesPath = getPicturesPath();
   const { canceled, filePaths } = await dialog.showOpenDialog({
     properties: ["multiSelections"],
+    filters: [{ name: "Images", extensions: ["jpg", "png"] }],
   });
   if (canceled) {
     console.log(canceled);
@@ -261,6 +262,7 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
   if (args.op_type === "images") {
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: ["multiSelections"],
+      filters: [{ name: "Images", extensions: ["jpg", "png"] }],
     });
     // console.log(filePaths);
     uploadedFiles = filePaths;
