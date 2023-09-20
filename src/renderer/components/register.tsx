@@ -72,6 +72,7 @@ export default function Register() {
     if (nationalCodeStatus) {
       window.electron.ipcRenderer.removeAllListenersResultRegister();
       window.electron.ipcRenderer.onResultRegister((event, value) => {
+        console.log(value.status);
         if (value.status === "OkInsert") {
           console.log(value.status);
           toast.success("اطلاعات ذخیره شد", {
@@ -81,6 +82,16 @@ export default function Register() {
               fontFamily: "IRANSansWeb",
             },
           });
+        } else if (value.status === "ErrorInsertUser") {
+          if (JSON.parse(value.error).code === "SQLITE_CONSTRAINT") {
+            toast.error("کد ملی تکراری است", {
+              position: toast.POSITION.TOP_RIGHT,
+              autoClose: 1000,
+              style: {
+                fontFamily: "IRANSansWeb",
+              },
+            });
+          }
         }
       });
 

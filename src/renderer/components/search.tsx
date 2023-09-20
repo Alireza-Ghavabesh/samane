@@ -34,6 +34,7 @@ export default function Search() {
             src: images(`./${image.image_id}-${image.original}`),
             user_id: parsedUser.user_id,
             image_id: image.image_id,
+            image_name: `${image.image_id}-${image.original}`,
           };
 
           userImages.push(img);

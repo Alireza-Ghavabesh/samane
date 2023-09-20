@@ -14,10 +14,12 @@ import { BrowserWindow, shell, ipcMain, dialog } from "electron";
 const { app, net, protocol } = require("electron");
 const { join } = require("node:path");
 const { pathToFileURL } = require("url");
+const lockFile = require("lockfile");
+
+lockFile.lock("AppPictures", function (er) {});
 
 // import { autoUpdater } from 'electron-updater';
 // import log from 'electron-log';
-import { randomUUID } from "crypto";
 
 import { resolveHtmlPath } from "./util";
 // import MenuBuilder from "./menu";
@@ -179,7 +181,8 @@ db.run(`CREATE TABLE IF NOT EXISTS users (
   national_code TEXT,
   birth_date TEXT,
   address TEXT,
-  mobile TEXT
+  mobile TEXT,
+  UNIQUE(national_code)
 )`);
 db.run(`CREATE TABLE IF NOT EXISTS images (
   image_id INTEGER,
@@ -300,9 +303,11 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
       function (err) {
         let OK = true;
         if (err) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          OK = false;
-          console.log(err);
+          console.log(`userInsertError: ${err}`);
+          mainWindow.webContents.send("onResultRegister", {
+            status: "ErrorInsertUser",
+            error: JSON.stringify(err),
+          });
         } else {
           if (uploadedFiles === undefined) {
             uploadedFiles = [];
@@ -325,7 +330,6 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
                 ],
                 function (errr: any) {
                   if (errr) {
-                    OK = false;
                   } else {
                     copyFileFromDatabase(
                       filePath,
@@ -335,18 +339,20 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
                       .then(() => {
                         mainWindow.webContents.send("onResultRegister", {
                           status: "OkInsert",
-                          num: filePaths.length,
                         });
                       })
                       .catch(() => {
                         mainWindow.webContents.send("onResultRegister", {
                           status: "ErrorCopy",
-                          num: filePaths.length,
                         });
                       });
                   }
                 }
               );
+            });
+          } else {
+            mainWindow.webContents.send("onResultRegister", {
+              status: "OkInsert",
             });
           }
         }
@@ -476,7 +482,11 @@ ipcMain.handle("invokeDeleteUserImage", async (event, args) => {
       return console.error(err.message);
     }
     console.log(`Row(s) deleted: ${this.changes}`);
-    mainWindow.webContents.send("onResultDeleteUserImage", { status: "OK" });
+    fs.unlink(`AppPictures/${args.image_name}`, (err) => {
+      if (err) throw err;
+      console.log("path/file.txt was deleted");
+      mainWindow.webContents.send("onResultDeleteUserImage", { status: "OK" });
+    });
   });
 });
 

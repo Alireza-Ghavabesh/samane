@@ -16,6 +16,7 @@ export default function Gallery(props) {
     if (ref.current.getLightboxState().slides.length > 0) {
       const user_id = ref.current.getLightboxState().currentSlide.user_id;
       const image_id = ref.current.getLightboxState().currentSlide.image_id;
+      const image_name = ref.current.getLightboxState().currentSlide.image_name;
       window.electron.ipcRenderer.removeAllListenersResultDeleteUserImage();
       window.electron.ipcRenderer.onResultDeleteUserImage((event, value) => {
         if (value.status === "OK") {
@@ -35,6 +36,7 @@ export default function Gallery(props) {
       window.electron.ipcRenderer.invokeDeleteUserImage({
         user_id: user_id,
         image_id: image_id,
+        image_name: image_name,
       });
     }
   };
