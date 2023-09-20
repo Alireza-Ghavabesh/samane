@@ -130,7 +130,7 @@ const createWindow = async () => {
     },
   });
 
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   mainWindow.removeMenu();
 
@@ -348,13 +348,6 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
                 }
               );
             });
-          }
-          // eslint-disable-next-line camelcase
-          // eslint-disable-next-line camelcase
-
-          if (OK) {
-            uploadedFiles = [];
-            mainWindow.webContents.send("onResultRegister", { status: "OK" });
           }
         }
       }

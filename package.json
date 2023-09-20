@@ -130,7 +130,7 @@
     "webpack-merge": "^5.9.0"
   },
   "build": {
-    "productName": "app",
+    "productName": "سامانه",
     "icon": "assets/installerIcon.ico",
     "appId": "org.erb.ElectronReact",
     "asar": true,
