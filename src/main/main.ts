@@ -30,13 +30,6 @@ import { resolveHtmlPath } from "./util";
 //   }
 // }
 
-app.whenReady().then(() => {
-  protocol.handle("app", (request) =>
-    net.fetch("file://" + request.url.slice("app://".length))
-  );
-  app.setAsDefaultProtocolClient("app");
-});
-
 function createPicturesDirIfNotExist() {
   if (!fs.existsSync(`./AppPictures`)) {
     fs.mkdirSync(`./AppPictures`, { recursive: true });
