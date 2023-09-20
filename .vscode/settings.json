@@ -1,16 +1,8 @@
 {
   "files.associations": {
-    ".eslintrc": "jsonc",
-    ".prettierrc": "jsonc",
-    ".eslintignore": "ignore"
+    ".prettierrc": "jsonc"
   },
-  
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "html",
-    "typescriptreact"
-  ],
+  "typescript.validate.enable": false,
 
   "javascript.validate.enable": false,
   "javascript.format.enable": false,

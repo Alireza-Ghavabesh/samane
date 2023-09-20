@@ -72,7 +72,7 @@ export default function Register() {
     if (nationalCodeStatus) {
       window.electron.ipcRenderer.removeAllListenersResultRegister();
       window.electron.ipcRenderer.onResultRegister((event, value) => {
-        if (value.status === "OK") {
+        if (value.status === "OkInsert") {
           console.log(value.status);
           toast.success("اطلاعات ذخیره شد", {
             position: toast.POSITION.TOP_RIGHT,

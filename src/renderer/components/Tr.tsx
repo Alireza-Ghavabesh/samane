@@ -8,6 +8,7 @@ import IRANSansWeb from "./../../../assets/fonts/IRANSansWeb.woff2";
 export default function Tr(props) {
   const [userImages, setUserImages] = useState(props.user.images);
   const TrRef = useRef(null);
+
   const notify = () => {
     let user_id = TrRef.current.id;
     let fullName = TrRef.current.childNodes[0].textContent;
@@ -62,13 +63,19 @@ export default function Tr(props) {
         console.log(value.newImagePath);
         console.log(value.user_id);
         console.log(value.image_id);
-        // setUserImages(() =>
-        //   userImages.push({
-        //     src: require(`${value.newImagePath}`),
+        // setUserImages(() => {
+        //   let images = require.context(
+        //     "./../../../AppPictures",
+        //     true,
+        //     /(\.jpg|\.png)$/
+        //   );
+        //   return userImages.push({
+        //     src: images(`./${value.newImagePath}`),
+
         //     user_id: value.user_id,
         //     image_id: value.image_id,
-        //   })
-        // );
+        //   });
+        // });
         toast.success("عکس ذخیره شد", {
           position: toast.POSITION.TOP_RIGHT,
           autoClose: 1000,

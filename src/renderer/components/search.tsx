@@ -8,33 +8,34 @@ function getFilename(fullPath: string) {
   return fullPath.replace(/^.*[\\\/]/, "");
 }
 
+function importAll(r) {
+  r.keys().forEach((key) => (cache[key] = r(key)));
+}
+
 export default function Search() {
   const [users, setUsers] = useState([]);
   // for search
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
+    let images = require.context(
+      "./../../../AppPictures",
+      true,
+      /(\.jpg|\.png)$/
+    );
     window.electron.ipcRenderer.removeAllListenersGetUsers();
     window.electron.ipcRenderer.onGetUsers((event, value) => {
       let tempUsers: any = [];
-      console.log(value.users);
       value.users.forEach((user) => {
         const userImages = [];
         const parsedUser = JSON.parse(user.record);
-
         parsedUser.images.forEach((image) => {
-          console.log(
-            `./../../../pictures/${image.national_code}/${getFilename(
-              image.original
-            )}`
-          );
           const img = {
-            src: require(`./../../../pictures/${
-              image.national_code
-            }/${getFilename(image.original)}`),
+            src: images(`./${image.image_id}-${image.original}`),
             user_id: parsedUser.user_id,
             image_id: image.image_id,
           };
+
           userImages.push(img);
         });
         const newUser = {

@@ -8,15 +8,19 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import path, { basename } from "path";
+import path, { basename, extname } from "path";
 import fs from "fs";
-import { app, BrowserWindow, shell, ipcMain, dialog } from "electron";
+import { BrowserWindow, shell, ipcMain, dialog } from "electron";
+const { app, net, protocol } = require("electron");
+const { join } = require("node:path");
+const { pathToFileURL } = require("url");
+
 // import { autoUpdater } from 'electron-updater';
 // import log from 'electron-log';
-// import crypto from 'crypto';
-// import MenuBuilder from './menu';
+import { randomUUID } from "crypto";
 
 import { resolveHtmlPath } from "./util";
+// import MenuBuilder from "./menu";
 
 // class AppUpdater {
 //   constructor() {
@@ -26,19 +30,31 @@ import { resolveHtmlPath } from "./util";
 //   }
 // }
 
+app.whenReady().then(() => {
+  protocol.handle("app", (request) =>
+    net.fetch("file://" + request.url.slice("app://".length))
+  );
+  app.setAsDefaultProtocolClient("app");
+});
+
 function createPicturesDirIfNotExist() {
-  if (!fs.existsSync(`./pictures`)) {
-    fs.mkdirSync(`./pictures`, { recursive: true });
+  if (!fs.existsSync(`./AppPictures`)) {
+    fs.mkdirSync(`./AppPictures`, { recursive: true });
   }
 }
 
 createPicturesDirIfNotExist();
 
-async function copyFileFromDatabase(FILEPATH: string, DEST: string) {
+async function copyFileFromDatabase(
+  FILEPATH: string,
+  DEST: string,
+  filename: string
+) {
   // eslint-disable-next-line compat/compat, func-names
   const promise = new Promise(function (resolve, reject) {
     const src = FILEPATH;
-    const dest = `${DEST}/${basename(src)}`;
+    const srcfExtention = extname(basename(src));
+    const dest = `${DEST}/${filename}${srcfExtention}`;
     if (!fs.existsSync(`${DEST}`)) {
       fs.mkdirSync(`${DEST}`, { recursive: true });
     }
@@ -121,6 +137,8 @@ const createWindow = async () => {
     },
   });
 
+  mainWindow.webContents.openDevTools();
+
   mainWindow.removeMenu();
 
   // eslint-disable-next-line promise/catch-or-return
@@ -143,8 +161,6 @@ const createWindow = async () => {
   mainWindow.on("closed", () => {
     mainWindow.destroy();
   });
-
-  // eslint-disable-next-line consistent-return, @typescript-eslint/no-unused-vars
 
   // const menuBuilder = new MenuBuilder(mainWindow);
   // menuBuilder.buildMenu();
@@ -205,51 +221,57 @@ ipcMain.handle("invokeNewUserImages", async (event, args) => {
       // eslint-disable-next-line no-restricted-syntax
       for (const filePath of filePaths) {
         // copy file in images folder
-        copyFileFromDatabase(filePath, `pictures/${args.nationalCode}`)
-          // eslint-disable-next-line consistent-return, no-loop-func
-          .then(() => {
-            db.run(
-              `
-              INSERT INTO images (user_id, original, thumbnail, full_path_src, national_code)
-              VALUES (?, ?, ?, ?, ?)
-              `,
-              // eslint-disable-next-line camelcase
-              [
-                args.user_id,
-                `${picturesPath}\\${args.nationalCode}\\${basename(filePath)}`,
-                `${picturesPath}\\${args.nationalCode}\\${basename(filePath)}`,
-                // eslint-disable-next-line camelcase
+        // copyFileFromDatabase(filePath, `pictures/${args.nationalCode}`)
+        db.run(
+          `
+          INSERT INTO images (user_id, original, thumbnail, full_path_src, national_code)
+          VALUES (?, ?, ?, ?, ?)
+          `,
+          // eslint-disable-next-line camelcase
+          [
+            args.user_id,
+            `${args.nationalCode}${extname(basename(filePath))}`,
+            `${args.nationalCode}${extname(basename(filePath))}`,
+            // eslint-disable-next-line camelcase
+            filePath,
+            args.nationalCode,
+          ],
+          function (err) {
+            if (err) {
+              mainWindow.webContents.send("onResultNewUserImages", {
+                status: "ErrorInsert",
+                error: JSON.stringify(err),
+              });
+            } else {
+              copyFileFromDatabase(
                 filePath,
-                args.nationalCode,
-              ],
-              function (err: any) {
-                if (err) {
-                  mainWindow.webContents.send("onResultNewUserImages", {
-                    status: "ErrorInsert",
-                    error: JSON.stringify(err),
-                  });
-                } else {
+                `AppPictures`,
+                `${this.lastID}-${args.nationalCode}`
+              )
+                // eslint-disable-next-line consistent-return, no-loop-func
+                .then(() => {
                   mainWindow.webContents.send("onResultNewUserImages", {
                     status: "OkInsert",
                     num: filePaths.length,
-                    newImagePath: `./../../../pictures/${
-                      args.nationalCode
-                    }/${basename(filePath)}`,
+                    newImagePath: `${this.lastID}-${args.nationalCode}${extname(
+                      basename(filePath)
+                    )}`,
                     user_id: args.user_id,
                     image_id: this.lastID,
+                    picturesPath: getPicturesPath(),
                   });
-                }
-              }
-            );
-          })
-          // eslint-disable-next-line no-loop-func
-          .catch(() => {
-            // send message NO
-            mainWindow.webContents.send("onResultNewUserImages", {
-              status: "ErrorCopy",
-              num: filePaths.length,
-            });
-          });
+                })
+                // eslint-disable-next-line no-loop-func
+                .catch(() => {
+                  // send message NO
+                  mainWindow.webContents.send("onResultNewUserImages", {
+                    status: "ErrorCopy",
+                    num: filePaths.length,
+                  });
+                });
+            }
+          }
+        );
       }
     }
   }
@@ -283,7 +305,6 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
         args.info.mobile,
       ],
       function (err) {
-        const picturesPath = getPicturesPath();
         let OK = true;
         if (err) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -295,11 +316,6 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
           }
           if (uploadedFiles.length > 0) {
             uploadedFiles.forEach((filePath) => {
-              // copy file in images folder
-              copyFileFromDatabase(
-                filePath,
-                `pictures/${args.info.nationalCode}`
-              );
               db.run(
                 `
               INSERT INTO images (user_id, original, thumbnail, full_path_src, national_code)
@@ -308,12 +324,8 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
                 // eslint-disable-next-line camelcase
                 [
                   this.lastID,
-                  `${picturesPath}\\${args.info.nationalCode}\\${basename(
-                    filePath
-                  )}`,
-                  `${picturesPath}\\${args.info.nationalCode}\\${basename(
-                    filePath
-                  )}`,
+                  `${args.info.nationalCode}${extname(basename(filePath))}`,
+                  `${args.info.nationalCode}${extname(basename(filePath))}`,
                   // eslint-disable-next-line camelcase
                   filePath,
                   args.info.nationalCode,
@@ -321,6 +333,24 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
                 function (errr: any) {
                   if (errr) {
                     OK = false;
+                  } else {
+                    copyFileFromDatabase(
+                      filePath,
+                      `AppPictures`,
+                      `${this.lastID}-${args.info.nationalCode}`
+                    )
+                      .then(() => {
+                        mainWindow.webContents.send("onResultRegister", {
+                          status: "OkInsert",
+                          num: filePaths.length,
+                        });
+                      })
+                      .catch(() => {
+                        mainWindow.webContents.send("onResultRegister", {
+                          status: "ErrorCopy",
+                          num: filePaths.length,
+                        });
+                      });
                   }
                 }
               );
@@ -476,10 +506,20 @@ app.on("window-all-closed", () => {
   }
 });
 
+// protocol.registerSchemesAsPrivileged([
+//   {
+//     scheme: "app",
+//     privileges: {
+//       standard: true,
+//     },
+//   },
+// ]);
+
 app
   .whenReady()
   .then(() => {
     createWindow();
+    // console.log(`default client: ${app.isDefaultProtocolClient("app")}`);
     app.on("activate", () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
