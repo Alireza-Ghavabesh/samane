@@ -1,12 +1,12 @@
 {
-  "name": "electron-react-boilerplate",
-  "version": "4.6.0",
-  "description": "A foundation for scalable desktop apps",
+  "name": "samane",
+  "version": "1.0.0",
+  "description": "user manager program",
   "license": "MIT",
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://github.com/electron-react-boilerplate"
+    "name": "alireza ghavabesh",
+    "email": "mohandesghavabesh@gmail.com",
+    "url": "https://github.com/alireza-ghavabesh"
   },
   "main": "./dist/main/main.js",
   "scripts": {
