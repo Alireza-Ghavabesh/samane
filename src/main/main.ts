@@ -166,7 +166,7 @@ const createWindow = async () => {
     },
   });
 
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   mainWindow.removeMenu();
 
