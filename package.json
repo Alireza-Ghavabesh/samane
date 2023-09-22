@@ -56,7 +56,6 @@
     "electron-log": "^4.4.8",
     "electron-updater": "^5.3.0",
     "install": "^0.13.0",
-    "lockfile": "^1.0.4",
     "npm": "^9.8.1",
     "rc-notification": "^5.2.0",
     "react": "^18.2.0",
@@ -98,7 +97,7 @@
     "css-loader": "^6.8.1",
     "css-minimizer-webpack-plugin": "^5.0.0",
     "detect-port": "^1.5.1",
-    "electron": "^25.0.1",
+    "electron": "^26.2.2",
     "electron-builder": "^24.2.1",
     "electron-devtools-installer": "^3.2.0",
     "electronmon": "^2.0.2",
@@ -134,6 +133,12 @@
     "productName": "سامانه",
     "icon": "assets/installerIcon.ico",
     "appId": "org.erb.ElectronReact",
+    "protocols": {
+      "name": "ghavabesh",
+      "schemes": [
+        "ghavabesh"
+      ]
+    },
     "asar": true,
     "asarUnpack": [
       "**\\*.{node,dll}"

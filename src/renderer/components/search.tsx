@@ -18,11 +18,7 @@ export default function Search() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    let images = require.context(
-      "./../../../AppPictures",
-      true,
-      /(\.jpg|\.png)$/
-    );
+    // let images = require.context("./../../../AppPictures", true, /\.jpg$/);
     window.electron.ipcRenderer.removeAllListenersGetUsers();
     window.electron.ipcRenderer.onGetUsers((event, value) => {
       let tempUsers: any = [];
@@ -31,10 +27,10 @@ export default function Search() {
         const parsedUser = JSON.parse(user.record);
         parsedUser.images.forEach((image) => {
           const img = {
-            src: images(`./${image.image_id}-${image.original}`),
+            src: `ghavabesh://${image.original}`,
             user_id: parsedUser.user_id,
             image_id: image.image_id,
-            image_name: `${image.image_id}-${image.original}`,
+            image_path: image.original,
           };
 
           userImages.push(img);

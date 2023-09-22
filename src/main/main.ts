@@ -13,10 +13,7 @@ import fs from "fs";
 import { BrowserWindow, shell, ipcMain, dialog } from "electron";
 const { app, net, protocol } = require("electron");
 const { join } = require("node:path");
-const { pathToFileURL } = require("url");
-const lockFile = require("lockfile");
-
-lockFile.lock("AppPictures", function (er) {});
+const url = require("url");
 
 // import { autoUpdater } from 'electron-updater';
 // import log from 'electron-log';
@@ -38,18 +35,13 @@ function createPicturesDirIfNotExist() {
   }
 }
 
-createPicturesDirIfNotExist();
+// createPicturesDirIfNotExist();
 
-async function copyFileFromDatabase(
-  FILEPATH: string,
-  DEST: string,
-  filename: string
-) {
+async function copyFileFromDatabase(FILEPATH: string, DEST: string) {
   // eslint-disable-next-line compat/compat, func-names
   const promise = new Promise(function (resolve, reject) {
     const src = FILEPATH;
-    const srcfExtention = extname(basename(src));
-    const dest = `${DEST}/${filename}${srcfExtention}`;
+    const dest = `${DEST}/${basename(src)}`;
     if (!fs.existsSync(`${DEST}`)) {
       fs.mkdirSync(`${DEST}`, { recursive: true });
     }
@@ -65,8 +57,24 @@ async function copyFileFromDatabase(
   return promise;
 }
 
-function getPicturesPath() {
-  return `${__dirname.split("\\src")[0]}\\pictures`;
+// 1. solve pictures path for production and Development
+// 2. add full path for each image
+// 3. enjoy from program :D
+
+let picturesPath;
+
+function getPicturesPathDevelopment() {
+  return path.resolve(__dirname, "../../pictures").replaceAll("\\", "/");
+}
+
+function getPicturesPathProduction() {
+  return path.resolve(__dirname, "../../../../pictures").replaceAll("\\", "/");
+}
+
+if (process.env.NODE_ENV === "development") {
+  picturesPath = getPicturesPathDevelopment();
+} else if (process.env.NODE_ENV === "production") {
+  picturesPath = getPicturesPathProduction();
 }
 
 let mainWindow: BrowserWindow;
@@ -104,6 +112,18 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: "ghavabesh",
+    privileges: {
+      bypassCSP: true,
+      standard: true,
+    },
+  },
+]);
+
+console.log(path.join(__dirname));
+
 const createWindow = async () => {
   if (isDebug) {
     await installExtensions();
@@ -116,6 +136,20 @@ const createWindow = async () => {
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
   };
+
+  protocol.registerFileProtocol("ghavabesh", (request, callback) => {
+    console.log(`request.url: ${request.url}`);
+    let filePath = request.url.substring(14);
+    let filePathWithDrive = request.url.substring(12);
+    let DriveName = filePathWithDrive[0].toUpperCase();
+    console.log(`filePath: ${filePath}`);
+    console.log(`DriveName:${DriveName}`);
+    let resolvedFilePath = `${DriveName}://${filePath}`;
+    console.log(`resolvedFilePath: ${resolvedFilePath}`);
+    callback({
+      path: resolvedFilePath,
+    });
+  });
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -132,7 +166,7 @@ const createWindow = async () => {
     },
   });
 
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   mainWindow.removeMenu();
 
@@ -200,7 +234,6 @@ db.run(`CREATE TABLE IF NOT EXISTS images (
 )`);
 
 ipcMain.handle("invokeNewUserImages", async (event, args) => {
-  const picturesPath = getPicturesPath();
   const { canceled, filePaths } = await dialog.showOpenDialog({
     properties: ["multiSelections"],
     filters: [{ name: "Images", extensions: ["jpg", "png"] }],
@@ -217,7 +250,8 @@ ipcMain.handle("invokeNewUserImages", async (event, args) => {
       // eslint-disable-next-line no-restricted-syntax
       for (const filePath of filePaths) {
         // copy file in images folder
-        // copyFileFromDatabase(filePath, `pictures/${args.nationalCode}`)
+        filePath.replaceAll("\\", "/");
+
         db.run(
           `
           INSERT INTO images (user_id, original, thumbnail, full_path_src, national_code)
@@ -226,8 +260,8 @@ ipcMain.handle("invokeNewUserImages", async (event, args) => {
           // eslint-disable-next-line camelcase
           [
             args.user_id,
-            `${args.nationalCode}${extname(basename(filePath))}`,
-            `${args.nationalCode}${extname(basename(filePath))}`,
+            `${picturesPath}/${args.nationalCode}/${basename(filePath)}`,
+            `${picturesPath}/${args.nationalCode}/${basename(filePath)}`,
             // eslint-disable-next-line camelcase
             filePath,
             args.nationalCode,
@@ -239,22 +273,17 @@ ipcMain.handle("invokeNewUserImages", async (event, args) => {
                 error: JSON.stringify(err),
               });
             } else {
-              copyFileFromDatabase(
-                filePath,
-                `AppPictures`,
-                `${this.lastID}-${args.nationalCode}`
-              )
+              copyFileFromDatabase(filePath, `pictures/${args.nationalCode}`)
                 // eslint-disable-next-line consistent-return, no-loop-func
                 .then(() => {
                   mainWindow.webContents.send("onResultNewUserImages", {
                     status: "OkInsert",
                     num: filePaths.length,
-                    newImagePath: `${this.lastID}-${args.nationalCode}${extname(
-                      basename(filePath)
-                    )}`,
+                    newImagePath: `${picturesPath}/${
+                      args.nationalCode
+                    }/${basename(filePath)}`,
                     user_id: args.user_id,
                     image_id: this.lastID,
-                    picturesPath: getPicturesPath(),
                   });
                 })
                 // eslint-disable-next-line no-loop-func
@@ -314,6 +343,7 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
           }
           if (uploadedFiles.length > 0) {
             uploadedFiles.forEach((filePath) => {
+              filePath.replaceAll("\\", "/");
               db.run(
                 `
               INSERT INTO images (user_id, original, thumbnail, full_path_src, national_code)
@@ -322,8 +352,12 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
                 // eslint-disable-next-line camelcase
                 [
                   this.lastID,
-                  `${args.info.nationalCode}${extname(basename(filePath))}`,
-                  `${args.info.nationalCode}${extname(basename(filePath))}`,
+                  `${picturesPath}/${args.info.nationalCode}/${basename(
+                    filePath
+                  )}`,
+                  `${picturesPath}/${args.info.nationalCode}/${basename(
+                    filePath
+                  )}`,
                   // eslint-disable-next-line camelcase
                   filePath,
                   args.info.nationalCode,
@@ -333,8 +367,7 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
                   } else {
                     copyFileFromDatabase(
                       filePath,
-                      `AppPictures`,
-                      `${this.lastID}-${args.info.nationalCode}`
+                      `pictures/${args.info.nationalCode}`
                     )
                       .then(() => {
                         mainWindow.webContents.send("onResultRegister", {
@@ -350,6 +383,7 @@ ipcMain.handle("invokeRegisterUserInfo", async (event, args) => {
                 }
               );
             });
+            uploadedFiles = [];
           } else {
             mainWindow.webContents.send("onResultRegister", {
               status: "OkInsert",
@@ -482,7 +516,7 @@ ipcMain.handle("invokeDeleteUserImage", async (event, args) => {
       return console.error(err.message);
     }
     console.log(`Row(s) deleted: ${this.changes}`);
-    fs.unlink(`AppPictures/${args.image_name}`, (err) => {
+    fs.unlink(args.image_path, (err) => {
       if (err) throw err;
       console.log("path/file.txt was deleted");
       mainWindow.webContents.send("onResultDeleteUserImage", { status: "OK" });
@@ -501,15 +535,6 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
-
-// protocol.registerSchemesAsPrivileged([
-//   {
-//     scheme: "app",
-//     privileges: {
-//       standard: true,
-//     },
-//   },
-// ]);
 
 app
   .whenReady()
